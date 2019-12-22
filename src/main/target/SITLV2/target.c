@@ -79,9 +79,13 @@ int lockMainPID(void) {
 #define RAD2DEG (180.0 / M_PI)
 #define ACC_SCALE (256 / 9.80665)
 #define GYRO_SCALE (16.4)
+
 void sendMotorUpdate() {
     udpSend(&pwmLink, &pwmPkt, sizeof(servo_packet));
+    //printf("[pwm]%u:%u,%u,%u,%u\n", idlePulse, motorsPwm[0], motorsPwm[1], motorsPwm[2], motorsPwm[3]);
+    printf("[sendMotorUpdate]%1.2f,%1.2f,%1.2f,%1.2f\n", (double)pwmPkt.motor_speed[0], (double)pwmPkt.motor_speed[1], (double)pwmPkt.motor_speed[2], (double)pwmPkt.motor_speed[3]);
 }
+
 void updateState(const fdm_packet* pkt) {
     static double last_timestamp = 0; // in seconds
     static uint64_t last_realtime = 0; // in uS
@@ -469,8 +473,7 @@ static void pwmCompleteMotorUpdate(void)
 
     // get one "fdm_packet" can only send one "servo_packet"!!
     if (pthread_mutex_trylock(&updateLock) != 0) return;
-    udpSend(&pwmLink, &pwmPkt, sizeof(servo_packet));
-    printf("[pwm]%u:%u,%u,%u,%u\n", idlePulse, motorsPwm[0], motorsPwm[1], motorsPwm[2], motorsPwm[3]);
+    sendMotorUpdate();
 }
 
 void pwmWriteServo(uint8_t index, float value) {
