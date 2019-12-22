@@ -326,6 +326,11 @@ uint64_t millis64() {
 //    return millis64_real();
 }
 
+//used in serial_rx
+uint32_t microsISR(void) {
+    return micros64() & 0xFFFFFFFF;
+}
+
 uint32_t micros(void) {
     return micros64() & 0xFFFFFFFF;
 }
@@ -426,7 +431,11 @@ static bool pwmEnableMotors(void)
 
 static void pwmWriteMotor(uint8_t index, float value)
 {
-    motorsPwm[index] = value - idlePulse;
+    int16_t newValue = value - idlePulse;
+    if(newValue!=motorsPwm[index]){
+        printf("pwmWriteMotor: %d %f\n", index, (double)value);
+    }
+    motorsPwm[index] = newValue;
 }
 
 static void pwmWriteMotorInt(uint8_t index, uint16_t value)
@@ -461,7 +470,7 @@ static void pwmCompleteMotorUpdate(void)
     // get one "fdm_packet" can only send one "servo_packet"!!
     if (pthread_mutex_trylock(&updateLock) != 0) return;
     udpSend(&pwmLink, &pwmPkt, sizeof(servo_packet));
-//    printf("[pwm]%u:%u,%u,%u,%u\n", idlePulse, motorsPwm[0], motorsPwm[1], motorsPwm[2], motorsPwm[3]);
+    printf("[pwm]%u:%u,%u,%u,%u\n", idlePulse, motorsPwm[0], motorsPwm[1], motorsPwm[2], motorsPwm[3]);
 }
 
 void pwmWriteServo(uint8_t index, float value) {
