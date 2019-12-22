@@ -583,11 +583,18 @@ FLASH_Status FLASH_ProgramWord(uintptr_t addr, uint32_t value) {
 void uartPinConfigure(const serialPinConfig_t *pSerialPinConfig)
 {
     UNUSED(pSerialPinConfig);
-    printf("uartPinConfigure");
+    printf("uartPinConfigure\n");
+}
+
+void IOConfigGPIO(IO_t io, ioConfig_t cfg)
+{
+    UNUSED(io);
+    UNUSED(cfg);
+    printf("IOConfigGPIO\n");
 }
 
 void spektrumBind(rxConfig_t *rxConfig)
 {
     UNUSED(rxConfig);
-    printf("spektrumBind");
+    printf("spektrumBind\n");
 }
