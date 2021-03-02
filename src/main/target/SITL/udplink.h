@@ -12,17 +12,19 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#include <arpa/inet.h>
-#include <netinet/in.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+typedef struct udp_link_private_s udp_link_private_t;
+
+//    struct sockaddr_in si;
+//    struct sockaddr_in recv;
+
+
 typedef struct {
+    udp_link_private_t *priv;
     int fd;
-    struct sockaddr_in si;
-    struct sockaddr_in recv;
     int port;
     char* addr;
     bool isServer;

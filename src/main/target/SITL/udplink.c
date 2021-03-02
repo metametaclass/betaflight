@@ -8,9 +8,23 @@
 #include <string.h>
 
 #include <fcntl.h>
+#ifdef WIN32
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#else
 #include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#endif
+
 
 #include "udplink.h"
+
+typedef struct udp_link_private_s {
+    struct sockaddr_in si;
+    struct sockaddr_in recv;
+
+} udp_link_private_t;
 
 int udpInit(udpLink_t* link, const char* addr, int port, bool isServer) {
     int one = 1;
@@ -19,23 +33,24 @@ int udpInit(udpLink_t* link, const char* addr, int port, bool isServer) {
         return -2;
     }
 
-    setsockopt(link->fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one)); // can multi-bind
-    fcntl(link->fd, F_SETFL, fcntl(link->fd, F_GETFL, 0) | O_NONBLOCK); // nonblock
+    //setsockopt(link->fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one)); // can multi-bind
+    //fcntl(link->fd, F_SETFL, fcntl(link->fd, F_GETFL, 0) | O_NONBLOCK); // nonblock
 
     link->isServer = isServer;
-    memset(&link->si, 0, sizeof(link->si));
-    link->si.sin_family = AF_INET;
-    link->si.sin_port = htons(port);
+    link->priv = malloc(sizeof(udp_link_private_t));
+    memset(&link->priv->si, 0, sizeof(link->priv->si));
+    link->priv->si.sin_family = AF_INET;
+    link->priv->si.sin_port = htons(port);
     link->port = port;
 
     if (addr == NULL) {
-        link->si.sin_addr.s_addr = htonl(INADDR_ANY);
+        link->priv->si.sin_addr.s_addr = htonl(INADDR_ANY);
     }else{
-        link->si.sin_addr.s_addr = inet_addr(addr);
+        link->priv->si.sin_addr.s_addr = inet_addr(addr);
     }
 
     if (isServer) {
-        if (bind(link->fd, (const struct sockaddr *)&link->si, sizeof(link->si)) == -1) {
+        if (bind(link->fd, (const struct sockaddr *)&link->priv->si, sizeof(link->priv->si)) == -1) {
             return -1;
         }
     }
@@ -43,7 +58,7 @@ int udpInit(udpLink_t* link, const char* addr, int port, bool isServer) {
 }
 
 int udpSend(udpLink_t* link, const void* data, size_t size) {
-    return sendto(link->fd, data, size, 0, (struct sockaddr *)&link->si, sizeof(link->si));
+    return sendto(link->fd, data, size, 0, (struct sockaddr *)&link->priv->si, sizeof(link->priv->si));
 }
 
 int udpRecv(udpLink_t* link, void* data, size_t size, uint32_t timeout_ms) {
@@ -62,6 +77,6 @@ int udpRecv(udpLink_t* link, void* data, size_t size, uint32_t timeout_ms) {
 
     socklen_t len;
     int ret;
-    ret = recvfrom(link->fd, data, size, 0, (struct sockaddr *)&link->recv, &len);
+    ret = recvfrom(link->fd, data, size, 0, (struct sockaddr *)&link->priv->recv, &len);
     return ret;
 }

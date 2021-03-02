@@ -44,8 +44,10 @@ TARGET_MAP  = $(OBJECT_DIR)/$(FORKNAME)_$(TARGET).map
 LD_FLAGS    := \
               -lm \
               -lpthread \
-              -lc \
-              -lrt \
+#              -lc \
+#              -lrt \
+              -lws2_32 \
+              -lwsock2 \
               $(ARCH_FLAGS) \
               $(LTO_FLAGS) \
               $(DEBUG_FLAGS) \
