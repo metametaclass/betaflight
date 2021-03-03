@@ -43,7 +43,7 @@ TARGET_MAP  = $(OBJECT_DIR)/$(FORKNAME)_$(TARGET).map
 
 LIBS := -lm -lpthread 
 
-ifeq ($(findstring MINGW, $(uname)), MINGW)
+ifeq ($(MINGW),1)
 LIBS     += \
               -lws2_32 \
               -lwsock32
@@ -57,6 +57,7 @@ endif
 LD_FLAGS    := \
               -lm \
               -lpthread \
+              $(LIBS) \
               $(ARCH_FLAGS) \
               $(LTO_FLAGS) \
               $(DEBUG_FLAGS) \
