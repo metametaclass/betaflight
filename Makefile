@@ -33,6 +33,8 @@ RAM_BASED ?= no
 # reserve space for custom defaults
 CUSTOM_DEFAULTS_EXTENDED ?= no
 
+SAVE_TEMPS ?= no
+
 # Debugger optons:
 #   empty           - ordinary build with all optimizations enabled
 #   RELWITHDEBINFO  - ordinary build with debug symbols and all optimizations enabled
@@ -241,6 +243,12 @@ CC_NO_OPTIMISATION      :=
 #
 TEMPORARY_FLAGS :=
 
+SAVE_TEMPS_FLAGS :=
+
+ifeq ($(SAVE_TEMPS),yes)
+SAVE_TEMPS_FLAGS := -save-temps=obj
+endif
+
 CFLAGS     += $(ARCH_FLAGS) \
               $(addprefix -D,$(OPTIONS)) \
               $(addprefix -I,$(INCLUDE_DIRS)) \
@@ -260,7 +268,7 @@ CFLAGS     += $(ARCH_FLAGS) \
               -D'__FORKNAME__="$(FORKNAME)"' \
               -D'__TARGET__="$(TARGET)"' \
               -D'__REVISION__="$(REVISION)"' \
-              -save-temps=obj \
+              $(SAVE_TEMPS_FLAGS) \
               -MMD -MP \
               $(EXTRA_FLAGS)
 
