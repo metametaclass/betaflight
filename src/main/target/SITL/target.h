@@ -133,7 +133,8 @@
 #undef USE_I2C
 #undef USE_SPI
 #undef USE_GYRO_REGISTER_DUMP
-//#undef USE_PID_AUDIO
+#undef USE_PID_AUDIO
+#undef USE_SERIALRX_SRXL2
 
 #define TARGET_FLASH_SIZE 2048
 

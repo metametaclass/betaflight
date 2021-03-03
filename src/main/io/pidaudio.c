@@ -41,17 +41,23 @@ static pidAudioModes_e pidAudioMode = PID_AUDIO_PIDSUM_XY;
 
 void pidAudioInit(void)
 {
+#if defined(USE_PID_AUDIO)
     audioSetupIO();
+#endif
 }
 
 void pidAudioStart(void)
 {
+#if defined(USE_PID_AUDIO)
     audioGenerateWhiteNoise();
+#endif
 }
 
 void pidAudioStop(void)
 {
+#if defined(USE_PID_AUDIO)
     audioSilence();
+#endif
 }
 
 pidAudioModes_e pidAudioGetMode(void)
@@ -105,6 +111,7 @@ void FAST_CODE_NOINLINE pidAudioUpdate(void)
     default:
         break;
     }
-
+#if defined(USE_PID_AUDIO)
     audioPlayTone(tone);
+#endif
 }
