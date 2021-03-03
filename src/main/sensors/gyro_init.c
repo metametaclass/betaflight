@@ -27,6 +27,7 @@
 #include "platform.h"
 
 #include "build/debug.h"
+#include "build/debug_log.h"
 
 #include "common/axis.h"
 #include "common/maths.h"
@@ -234,9 +235,11 @@ static void dynLpfFilterInit()
 
 void gyroInitFilters(void)
 {
+    SITL_DEBUG_LOG();
     uint16_t gyro_lowpass_hz = gyroConfig()->gyro_lowpass_hz;
 
 #ifdef USE_DYN_LPF
+    SITL_DEBUG_LOG("USE_DYN_LPF");
     if (gyroConfig()->dyn_lpf_gyro_min_hz > 0) {
         gyro_lowpass_hz = gyroConfig()->dyn_lpf_gyro_min_hz;
     }

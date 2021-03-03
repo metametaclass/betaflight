@@ -136,6 +136,8 @@
 #undef USE_PID_AUDIO
 #undef USE_SERIALRX_SRXL2
 
+#define USE_DEBUG_LOG
+
 #define TARGET_FLASH_SIZE 2048
 
 
