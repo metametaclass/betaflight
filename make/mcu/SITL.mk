@@ -41,11 +41,22 @@ MCU_EXCLUDES = \
 
 TARGET_MAP  = $(OBJECT_DIR)/$(FORKNAME)_$(TARGET).map
 
+LIBS := -lm -lpthread 
+
+ifeq ($(findstring MINGW, $(uname)), MINGW)
+LIBS     += \
+              -lws2_32 \
+              -lwsock32
+else
+LIBS     += \
+              -lc \
+              -lrt
+endif
+
+
 LD_FLAGS    := \
               -lm \
               -lpthread \
-              -lws2_32 \
-              -lwsock32 \
               $(ARCH_FLAGS) \
               $(LTO_FLAGS) \
               $(DEBUG_FLAGS) \
