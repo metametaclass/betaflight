@@ -58,7 +58,6 @@ endif
 
 
 LD_FLAGS    := \
-              -lm \
               $(LIBS) \
               $(ARCH_FLAGS) \
               $(LTO_FLAGS) \
