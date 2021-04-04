@@ -59,7 +59,6 @@ endif
 
 LD_FLAGS    := \
               -lm \
-              -lpthread \
               $(LIBS) \
               $(ARCH_FLAGS) \
               $(LTO_FLAGS) \
