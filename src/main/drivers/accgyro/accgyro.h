@@ -31,8 +31,10 @@
 #include "drivers/accgyro/accgyro_mpu.h"
 
 #pragma GCC diagnostic push
-#if defined(SIMULATOR_BUILD) && defined(SIMULATOR_MULTITHREAD)
+#if defined(SIMULATOR_BUILD)
+#if defined(SIMULATOR_MULTITHREAD)
 #include <pthread.h>
+#endif
 #elif !defined(UNIT_TEST)
 #pragma GCC diagnostic warning "-Wpadded"
 #endif
