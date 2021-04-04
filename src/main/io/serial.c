@@ -38,7 +38,7 @@
 #include "drivers/serial_softserial.h"
 #endif
 
-#if defined(SIMULATOR_BUILD)
+#if defined(USE_SERIAL_TCP)
 #include "drivers/serial_tcp.h"
 #endif
 
@@ -397,9 +397,14 @@ serialPort_t *openSerialPort(
 #ifdef USE_UART9
         case SERIAL_PORT_LPUART1:
 #endif
-#if defined(SIMULATOR_BUILD)
+#if defined(USE_SERIAL_TCP)
             // emulate serial ports over TCP
             serialPort = serTcpOpen(SERIAL_PORT_IDENTIFIER_TO_UARTDEV(identifier), rxCallback, rxCallbackData, baudRate, mode, options);
+#elif defined(USE_LIBUV)
+
+            // emulate serial ports over libuv i/o
+#pragma warning "TODO: implement TCP uart"
+            serialPort = NULL;
 #else
             serialPort = uartOpen(SERIAL_PORT_IDENTIFIER_TO_UARTDEV(identifier), rxCallback, rxCallbackData, baudRate, mode, options);
 #endif
