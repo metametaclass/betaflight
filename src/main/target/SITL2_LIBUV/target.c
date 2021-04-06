@@ -53,6 +53,7 @@ const timerHardware_t timerHardware[1]; // unused
 
 #include "rx/rx.h"
 
+#include "wmq_error.h"
 
 uint32_t SystemCoreClock;
 
@@ -576,9 +577,9 @@ FLASH_Status FLASH_ErasePage(uintptr_t Page_Address) {
 FLASH_Status FLASH_ProgramWord(uintptr_t addr, uint32_t value) {
     if ((addr >= (uintptr_t)eepromData) && (addr < (uintptr_t)ARRAYEND(eepromData))) {
         *((uint32_t*)addr) = value;
-        printf("[FLASH_ProgramWord]%p = %08x\n", (void*)addr, *((uint32_t*)addr));
+        WMQ_LOG(LL_DEBUG, "%p = %08x\n", (void*)addr, *((uint32_t*)addr));
     } else {
-        printf("[FLASH_ProgramWord]%p out of range!\n", (void*)addr);
+        WMQ_LOG(LL_WARN, "%p out of range", (void*)addr);
     }
     return FLASH_COMPLETE;
 }
