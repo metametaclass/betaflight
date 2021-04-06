@@ -170,7 +170,6 @@ static libuvSerialPort_t* libuvSerialInit(libuvSerialPort_t *s, int id)
     s->clientCount = 0;
     s->id = id;
 
-    //TODO: create libuv listener
     rc = uv_tcp_init(libuv_loop, &s->server);
     WMQ_CHECK_ERROR(rc, "uv_tcp_init");
     if(rc){
