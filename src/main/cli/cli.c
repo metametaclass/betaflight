@@ -27,6 +27,7 @@
 #include <ctype.h>
 
 #include "platform.h"
+#include "common/string_light.h"
 
 // FIXME remove this for targets that don't need a CLI.  Perhaps use a no-op macro when USE_CLI is not enabled
 // signal that we're in cli mode
