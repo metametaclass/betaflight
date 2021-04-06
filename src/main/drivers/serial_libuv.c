@@ -59,7 +59,7 @@ static void on_alloc_buffer(uv_handle_t* handle, size_t size, uv_buf_t* buf) {
 static void on_close_client_handle(uv_handle_t* handle) {
     WMQ_LOG(LL_INFO, "");
     uv_tcp_t *client = (uv_tcp_t *)handle;
-    libuvSerialPort_t *port = container_of(client, libuvSerialPort_t, server);
+    libuvSerialPort_t *port = container_of(client, libuvSerialPort_t, client);
     port->connected = false;
 }
 
