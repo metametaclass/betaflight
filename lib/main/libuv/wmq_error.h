@@ -1,6 +1,6 @@
 #pragma once
 
-#include "debug.h"
+#include "wmq_debug.h"
 #include "uv.h"
 
 #define CANARY_VALUE 0xA55AA55A

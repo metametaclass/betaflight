@@ -1,4 +1,4 @@
-#include "debug.h"
+#include "wmq_debug.h"
 
 #include <assert.h>
 #include <inttypes.h>
