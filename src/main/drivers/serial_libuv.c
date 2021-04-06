@@ -108,7 +108,8 @@ static void on_incoming_tcp_read(uv_stream_t* client_handle, ssize_t nread, cons
                 }
             }
 
-            //TODO: force call SERIAL scheduler task ahead of time?
+            //force call scheduler
+            scheduler();
         }
     }
 }
