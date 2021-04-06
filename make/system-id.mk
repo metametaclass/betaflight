@@ -30,6 +30,8 @@ endif
 ifeq (MINGW, $(findstring MINGW,$(UNAME)))
   OSFAMILY := windows
   MINGW := 1
+  OBJECT_DIR  := $(ROOT)/windows/main
+  BIN_DIR := $(ROOT)/windows
 endif
 
 # Windows using Cygwin shell
