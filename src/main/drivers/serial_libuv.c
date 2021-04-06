@@ -85,7 +85,7 @@ static void on_incoming_tcp_read(uv_stream_t* client_handle, ssize_t nread, cons
         WMQ_LOG(LL_INFO, "close client_handle");
         uv_close((uv_handle_t*)client_handle, on_close_client_handle);
     } else {
-        debug_print_hex(LL_INFO, "", buf->base, nread, 0);
+        debug_print_hex(LL_DEBUG, "", buf->base, nread, 0);
         if(port->port.rxCallback){
             //feed read callback
             for(ssize_t idx = 0; idx<nread;idx++){
