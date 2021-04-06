@@ -42,6 +42,10 @@
 #include "drivers/serial_tcp.h"
 #endif
 
+#if defined(USE_LIBUV)
+#include "drivers/serial_libuv.h"
+#endif
+
 #include "drivers/light_led.h"
 
 #if defined(USE_VCP)
@@ -401,10 +405,8 @@ serialPort_t *openSerialPort(
             // emulate serial ports over TCP
             serialPort = serTcpOpen(SERIAL_PORT_IDENTIFIER_TO_UARTDEV(identifier), rxCallback, rxCallbackData, baudRate, mode, options);
 #elif defined(USE_LIBUV)
-
             // emulate serial ports over libuv i/o
-#pragma warning "TODO: implement TCP uart"
-            serialPort = NULL;
+            serialPort = libuvSerialOpen(SERIAL_PORT_IDENTIFIER_TO_UARTDEV(identifier), rxCallback, rxCallbackData, baudRate, mode, options);
 #else
             serialPort = uartOpen(SERIAL_PORT_IDENTIFIER_TO_UARTDEV(identifier), rxCallback, rxCallbackData, baudRate, mode, options);
 #endif

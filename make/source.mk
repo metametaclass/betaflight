@@ -313,6 +313,7 @@ SIZE_OPTIMISED_SRC := $(SIZE_OPTIMISED_SRC) \
             drivers/serial_escserial.c \
             drivers/serial_pinconfig.c \
             drivers/serial_tcp.c \
+            drivers/serial_libuv.c \
             drivers/serial_uart_pinconfig.c \
             drivers/serial_usb_vcp.c \
             drivers/transponder_ir_io_hal.c \
