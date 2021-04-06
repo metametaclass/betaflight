@@ -540,7 +540,7 @@ void FLASH_Unlock(void) {
         if (n == lSize) {
             printf("[FLASH_Unlock] loaded '%s', size = %ld / %ld\n", EEPROM_FILENAME, lSize, sizeof(eepromData));
         } else {
-            fprintf(stderr, "[FLASH_Unlock] failed to load '%s'\n", EEPROM_FILENAME);
+            fprintf(stderr, "[FLASH_Unlock] failed to read '%s' %d %d\n", EEPROM_FILENAME, n, lSize);
             return;
         }
     } else {
@@ -559,10 +559,10 @@ void FLASH_Lock(void) {
     // flush & close
     if (eepromFd != NULL) {
         fseek(eepromFd, 0, SEEK_SET);
-        fwrite(eepromData, 1, sizeof(eepromData), eepromFd);
+        size_t written = fwrite(eepromData, 1, sizeof(eepromData), eepromFd);
         fclose(eepromFd);
         eepromFd = NULL;
-        printf("[FLASH_Lock] saved '%s'\n", EEPROM_FILENAME);
+        printf("[FLASH_Lock] saved '%s' %zu\n", EEPROM_FILENAME, written);
     } else {
         fprintf(stderr, "[FLASH_Lock] eeprom is not unlocked\n");
     }
