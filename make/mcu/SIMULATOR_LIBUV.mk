@@ -2,8 +2,9 @@ INCLUDE_DIRS    := $(INCLUDE_DIRS) \
                    $(ROOT)/lib/main/libuv
 
 MCU_COMMON_SRC  := \
-            $(ROOT)/lib/main/libuv/debug.c \
+            $(ROOT)/lib/main/libuv/wmq_debug.c \
             $(ROOT)/lib/main/libuv/libuv_compat.c \
+            $(ROOT)/lib/main/libuv/loop_utils.c \
             $(ROOT)/lib/main/libuv/wmq_error.c
 
 
