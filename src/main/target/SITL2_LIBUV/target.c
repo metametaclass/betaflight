@@ -53,6 +53,7 @@ const timerHardware_t timerHardware[1]; // unused
 
 #include "rx/rx.h"
 
+#include "wmq_debug.h"
 #include "wmq_error.h"
 
 uint32_t SystemCoreClock;
@@ -62,11 +63,6 @@ static servo_packet pwmPkt;
 
 static struct timespec start_time;
 static double simRate = 1.0;
-//static pthread_t tcpWorker, udpWorker;
-static bool workerRunning = true;
-//static udpLink_t stateLink, pwmLink;
-//static pthread_mutex_t updateLock;
-//static pthread_mutex_t mainLoopLock;
 
 int timeval_sub(struct timespec *result, struct timespec *x, struct timespec *y);
 
@@ -174,41 +170,6 @@ void updateState(const fdm_packet* pkt) {
 #endif
 }
 
-/*
-static void* udpThread(void* data) {
-    UNUSED(data);
-    int n = 0;
-
-    while (workerRunning) {
-        n = udpRecv(&stateLink, &fdmPkt, sizeof(fdm_packet), 100);
-        if (n == sizeof(fdm_packet)) {
-//            printf("[data]new fdm %d\n", n);
-            updateState(&fdmPkt);
-        }
-    }
-
-    printf("udpThread end!!\n");
-    return NULL;
-}
-
-static void* tcpThread(void* data) {
-    UNUSED(data);
-
-    dyad_init();
-    dyad_setTickInterval(0.2f);
-    dyad_setUpdateTimeout(0.5f);
-
-    while (workerRunning) {
-        dyad_update();
-    }
-
-    dyad_shutdown();
-    printf("tcpThread end!!\n");
-    return NULL;
-}
-
-*/
-
 // system
 void systemInit(void) {
     int ret;
@@ -218,53 +179,18 @@ void systemInit(void) {
 
     SystemCoreClock = 500 * 1e6; // fake 500MHz
 
-/*
-    if (pthread_mutex_init(&updateLock, NULL) != 0) {
-        printf("Create updateLock error!\n");
-        exit(1);
-    }
-
-    if (pthread_mutex_init(&mainLoopLock, NULL) != 0) {
-        printf("Create mainLoopLock error!\n");
-        exit(1);
-    }
-
-    ret = pthread_create(&tcpWorker, NULL, tcpThread, NULL);
-    if (ret != 0) {
-        printf("Create tcpWorker error!\n");
-        exit(1);
-    }
-
-    ret = udpInit(&pwmLink, "127.0.0.1", 9002, false);
-    printf("init PwmOut UDP link...%d\n", ret);
-
-    ret = udpInit(&stateLink, NULL, 9003, true);
-    printf("start UDP server...%d\n", ret);
-
-    ret = pthread_create(&udpWorker, NULL, udpThread, NULL);
-    if (ret != 0) {
-        printf("Create udpWorker error!\n");
-        exit(1);
-    }
-*/
     // serial can't been slow down
     rescheduleTask(TASK_SERIAL, 1);
 }
 
 void systemReset(void){
     printf("[system]Reset!\n");
-    workerRunning = false;
-    //pthread_join(tcpWorker, NULL);
-    //pthread_join(udpWorker, NULL);
     exit(0);
 }
 void systemResetToBootloader(bootloaderRequestType_e requestType) {
     UNUSED(requestType);
 
     printf("[system]ResetToBootloader!\n");
-    workerRunning = false;
-    //pthread_join(tcpWorker, NULL);
-    //pthread_join(udpWorker, NULL);
     exit(0);
 }
 
