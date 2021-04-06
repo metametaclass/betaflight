@@ -2,6 +2,9 @@
 
 #include "wmq_error.h"
 #include "wmq_debug.h"
+#include "libuv_compat.h"
+#include <stdlib.h>
+
 
 //buffer allocation callback
 void on_alloc_buffer(uv_handle_t* handle, size_t size, uv_buf_t* buf) {

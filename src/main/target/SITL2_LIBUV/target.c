@@ -58,7 +58,7 @@ const timerHardware_t timerHardware[1]; // unused
 
 uint32_t SystemCoreClock;
 
-static fdm_packet fdmPkt;
+//static fdm_packet fdmPkt;
 static servo_packet pwmPkt;
 
 static struct timespec start_time;
@@ -66,18 +66,14 @@ static double simRate = 1.0;
 
 int timeval_sub(struct timespec *result, struct timespec *x, struct timespec *y);
 
-/*
-int lockMainPID(void) {
-    return pthread_mutex_trylock(&mainLoopLock);
-}
-*/
-
 #define RAD2DEG (180.0 / M_PI)
 #define ACC_SCALE (256 / 9.80665)
 #define GYRO_SCALE (16.4)
+
 void sendMotorUpdate() {
     //udpSend(&pwmLink, &pwmPkt, sizeof(servo_packet));
 }
+
 void updateState(const fdm_packet* pkt) {
     static double last_timestamp = 0; // in seconds
     static uint64_t last_realtime = 0; // in uS
@@ -172,7 +168,6 @@ void updateState(const fdm_packet* pkt) {
 
 // system
 void systemInit(void) {
-    int ret;
 
     clock_gettime(CLOCK_MONOTONIC, &start_time);
     printf("[system]Init...\n");
@@ -466,7 +461,7 @@ void FLASH_Unlock(void) {
         if (n == lSize) {
             printf("[FLASH_Unlock] loaded '%s', size = %ld / %ld\n", EEPROM_FILENAME, lSize, sizeof(eepromData));
         } else {
-            fprintf(stderr, "[FLASH_Unlock] failed to read '%s' %d %d\n", EEPROM_FILENAME, n, lSize);
+            fprintf(stderr, "[FLASH_Unlock] failed to read '%s' %zu %zu\n", EEPROM_FILENAME, n, lSize);
             return;
         }
     } else {
