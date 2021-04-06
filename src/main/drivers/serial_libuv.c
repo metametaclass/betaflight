@@ -79,7 +79,7 @@ size_t libuvSerialRxBufferFreeSize(serialPort_t *port){
 //TCP client connection read callback
 static void on_incoming_tcp_read(uv_stream_t* client_handle, ssize_t nread, const uv_buf_t* buf) {
     uv_tcp_t *client = (uv_tcp_t *)client_handle;
-    libuvSerialPort_t *port = container_of(client, libuvSerialPort_t, server);
+    libuvSerialPort_t *port = container_of(client, libuvSerialPort_t, client);
 
     if (nread <= 0) {
         WMQ_LOG(LL_INFO, "close client_handle");
@@ -157,6 +157,8 @@ static libuvSerialPort_t* libuvSerialInit(libuvSerialPort_t *s, int id)
 {
     struct sockaddr addr = {0};
     int rc;
+
+    WMQ_LOG(LL_INFO, "%d", id);
 
     if (s->initialized) {
         WMQ_LOG(LL_WARN, "port %d is already initialized", id);
@@ -270,8 +272,8 @@ uint8_t libuvSerialRead(serialPort_t *instance)
     uint8_t ch;
     libuvSerialPort_t *s = (libuvSerialPort_t *)instance;
 
-    if(s->port.txBufferTail == s->port.txBufferHead){
-        WMQ_LOG(LL_ERROR, "buffer is empty");
+    if(s->port.rxBufferTail == s->port.rxBufferHead){
+        WMQ_LOG(LL_DEBUG, "rx buffer is empty");
         return 0;
     }
 
