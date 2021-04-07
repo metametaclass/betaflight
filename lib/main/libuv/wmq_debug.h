@@ -45,7 +45,7 @@ int debug_update_time();
 
 int debug_set_counters(uint64_t counter, uint64_t time);
 
-void debug_print_hex(int level, const char *msg, void *data, size_t len, size_t start_offset);
+void debug_print_hex(int level, const char *msg, const void *data, size_t len, size_t start_offset);
 
 void debug_init_error_handlers();
 

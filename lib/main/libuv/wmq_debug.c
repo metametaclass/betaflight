@@ -400,7 +400,7 @@ void debug_print_no_memory(const char *msg) {
 #define HEX_BUFFER_SIZE 160
 const char *debug_hex_chars = "0123456789ABCDEF";
 
-void debug_print_hex(int level, const char *msg, void *data, size_t len, size_t address) {
+void debug_print_hex(int level, const char *msg, const void *data, size_t len, size_t address) {
     size_t pos = 0;
     size_t size;
     size_t start_offset;
