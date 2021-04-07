@@ -1,3 +1,5 @@
+//debug logging utilities
+
 #pragma once
 
 #include <stddef.h>
@@ -8,11 +10,14 @@
 #define LL_DEBUG 10
 #define LL_DETAIL 20
 #define LL_DETAILINFO 25
+
 #define LL_INFO 30
+
 #define LL_WARN 40
+
 #define LL_ERROR 50
 #define LL_FATAL 60
-#define LL_NO_LOG 70;
+#define LL_NO_LOG 70
 
 #define WMQ_LOG_OPTION_USE_ODS 1
 #define WMQ_LOG_OPTION_USE_STDERR 2
