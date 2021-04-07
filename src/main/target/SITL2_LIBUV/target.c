@@ -448,7 +448,7 @@ void FLASH_Unlock(void) {
     }
 
     // open or create
-    eepromFd = fopen(EEPROM_FILENAME,"r+");
+    eepromFd = fopen(EEPROM_FILENAME,"rb+");
     if (eepromFd != NULL) {
         // obtain file size:
         fseek(eepromFd , 0 , SEEK_END);
@@ -464,7 +464,7 @@ void FLASH_Unlock(void) {
         }
     } else {
         printf("[FLASH_Unlock] created '%s', size = %zu\n", EEPROM_FILENAME, sizeof(eepromData));
-        if ((eepromFd = fopen(EEPROM_FILENAME, "w+")) == NULL) {
+        if ((eepromFd = fopen(EEPROM_FILENAME, "wb+")) == NULL) {
             fprintf(stderr, "[FLASH_Unlock] failed to create '%s'\n", EEPROM_FILENAME);
             return;
         }
