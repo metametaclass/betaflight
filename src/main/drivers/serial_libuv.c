@@ -221,6 +221,7 @@ serialPort_t *libuvSerialOpen(int id, serialReceiveCallbackPtr rxCallback, void 
     // common serial initialisation code should move to serialPort::init()
     s->port.rxBufferHead = s->port.rxBufferTail = 0;
     s->port.txBufferHead = s->port.txBufferTail = 0;
+    s->txBufferUsedSize = 0;
     s->port.rxBufferSize = RX_BUFFER_SIZE;
     s->port.txBufferSize = TX_BUFFER_SIZE;
     s->port.rxBuffer = s->rxBuffer;
@@ -301,6 +302,7 @@ void after_write_cb(uv_write_t* req, int status)
 
 
 int libuvWrite(uv_tcp_t *client, const void *data, size_t size){
+    debug_print_hex(LL_DEBUG, "", data, size, 0);
     write_req_t *req = malloc(sizeof(write_req_t));
     if(!req){
         WMQ_LOG_NOMEMORY("write_some: malloc 1 error");
@@ -322,17 +324,10 @@ int libuvWrite(uv_tcp_t *client, const void *data, size_t size){
     return 0;
 }
 
-void libuvSerialWrite(serialPort_t *instance, uint8_t ch)
+void libuvSerialEndWrite(serialPort_t *instance)
 {
     libuvSerialPort_t *s = (libuvSerialPort_t *)instance;
     int rc;
-
-    s->port.txBuffer[s->port.txBufferHead] = ch;
-    if (s->port.txBufferHead + 1 >= s->port.txBufferSize) {
-        s->port.txBufferHead = 0;
-    } else {
-        s->port.txBufferHead++;
-    }
 
     if(!s->connected){
         WMQ_LOG(LL_ERROR, "client disconnected");
@@ -355,8 +350,28 @@ void libuvSerialWrite(serialPort_t *instance, uint8_t ch)
     }
 
     s->port.txBufferTail = s->port.txBufferHead;
-
+    s->txBufferUsedSize = 0;
 }
+
+
+void libuvSerialWrite(serialPort_t *instance, uint8_t ch)
+{
+    libuvSerialPort_t *s = (libuvSerialPort_t *)instance;
+
+    s->port.txBuffer[s->port.txBufferHead] = ch;
+    if (s->port.txBufferHead + 1 >= s->port.txBufferSize) {
+        s->port.txBufferHead = 0;
+    } else {
+        s->port.txBufferHead++;
+    }
+
+    //too many data in buffer, force flush
+    if(s->txBufferUsedSize == s->port.txBufferSize){
+        WMQ_LOG(LL_WARN, "force flush buffer %u", s->txBufferUsedSize);
+        libuvSerialEndWrite(instance);
+    }
+}
+
 
 
 static const struct serialPortVTable libuvSerialVTable = {
@@ -371,5 +386,5 @@ static const struct serialPortVTable libuvSerialVTable = {
         .setBaudRateCb = NULL,
         .writeBuf = NULL,
         .beginWrite = NULL,
-        .endWrite = NULL,
+        .endWrite = libuvSerialEndWrite,
 };

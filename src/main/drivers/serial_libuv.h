@@ -30,6 +30,7 @@ typedef struct {
     serialPort_t port;
     uint8_t rxBuffer[RX_BUFFER_SIZE];
     uint8_t txBuffer[TX_BUFFER_SIZE];
+    uint32_t txBufferUsedSize;
 
     uv_tcp_t server;
     uv_tcp_t client;

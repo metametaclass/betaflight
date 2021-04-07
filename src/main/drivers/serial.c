@@ -109,7 +109,9 @@ void serialSetBaudRateCb(serialPort_t *serialPort, void (*cb)(serialPort_t *cont
 
 void serialWriteBufShim(void *instance, const uint8_t *data, int count)
 {
+    serialBeginWrite((serialPort_t *)instance);
     serialWriteBuf((serialPort_t *)instance, data, count);
+    serialEndWrite((serialPort_t *)instance);
 }
 
 void serialBeginWrite(serialPort_t *instance)
