@@ -457,13 +457,13 @@ void FLASH_Unlock(void) {
 
         size_t n = fread(eepromData, 1, sizeof(eepromData), eepromFd);
         if (n == lSize) {
-            printf("[FLASH_Unlock] loaded '%s', size = %ld / %ld\n", EEPROM_FILENAME, lSize, sizeof(eepromData));
+            printf("[FLASH_Unlock] loaded '%s', size = %zu / %zu\n", EEPROM_FILENAME, lSize, sizeof(eepromData));
         } else {
             fprintf(stderr, "[FLASH_Unlock] failed to read '%s' %zu %zu\n", EEPROM_FILENAME, n, lSize);
             return;
         }
     } else {
-        printf("[FLASH_Unlock] created '%s', size = %ld\n", EEPROM_FILENAME, sizeof(eepromData));
+        printf("[FLASH_Unlock] created '%s', size = %zu\n", EEPROM_FILENAME, sizeof(eepromData));
         if ((eepromFd = fopen(EEPROM_FILENAME, "w+")) == NULL) {
             fprintf(stderr, "[FLASH_Unlock] failed to create '%s'\n", EEPROM_FILENAME);
             return;
