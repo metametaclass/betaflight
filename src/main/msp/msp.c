@@ -379,7 +379,9 @@ static void mspRebootFn(serialPort_t *serialPort)
     }
 
     // control should never return here.
+#ifndef USE_LIBUV
     while (true) ;
+#endif
 }
 
 static void serializeSDCardSummaryReply(sbuf_t *dst)
