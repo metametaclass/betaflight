@@ -172,6 +172,8 @@ void systemInit(void) {
 
     SystemCoreClock = 500 * 1e6; // fake 500MHz
 
+    clock_gettime(CLOCK_MONOTONIC, &start_time);
+
     // serial can't been slow down
     rescheduleTask(TASK_SERIAL, 1);
 }
