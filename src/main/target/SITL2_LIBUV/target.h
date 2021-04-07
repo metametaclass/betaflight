@@ -261,7 +261,5 @@ void delayMicroseconds_real(uint32_t us);
 uint64_t micros64(void);
 uint64_t millis64(void);
 
-int lockMainPID(void);
-
 //global libuv event loop
 extern uv_loop_t libuv_loop;

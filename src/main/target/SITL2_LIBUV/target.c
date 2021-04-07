@@ -64,7 +64,6 @@ uv_loop_t libuv_loop;
 
 uint32_t SystemCoreClock;
 
-//static fdm_packet fdmPkt;
 static servo_packet pwmPkt;
 
 static struct timespec start_time;
@@ -164,12 +163,6 @@ void updateState(const fdm_packet* pkt) {
 
     last_ts.tv_sec = now_ts.tv_sec;
     last_ts.tv_nsec = now_ts.tv_nsec;
-
-    //pthread_mutex_unlock(&updateLock); // can send PWM output now
-
-#if defined(SIMULATOR_GYROPID_SYNC)
-    //pthread_mutex_unlock(&mainLoopLock); // can run main loop
-#endif
 }
 
 // system
@@ -390,8 +383,6 @@ static void pwmCompleteMotorUpdate(void)
     pwmPkt.motor_speed[1] = motorsPwm[2] / outScale;
     pwmPkt.motor_speed[2] = motorsPwm[3] / outScale;
 
-    // get one "fdm_packet" can only send one "servo_packet"!!
-    //if (pthread_mutex_trylock(&updateLock) != 0) return;
     //udpSend(&pwmLink, &pwmPkt, sizeof(servo_packet));
 //   printf("[pwm]%u:%u,%u,%u,%u\n", idlePulse, motorsPwm[0], motorsPwm[1], motorsPwm[2], motorsPwm[3]);
 }
