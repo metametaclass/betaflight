@@ -87,13 +87,25 @@ void run_timer_cb(uv_timer_t *timer) {
     processLoopback();
 }
 
+static uint64_t hr_time;
+
+void on_idle(uv_idle_t *idle) {
+    UNUSED(idle);
+    uint64_t next_time = uv_hrtime();
+    if (next_time-hr_time>10000){
+        scheduler();
+        processLoopback();
+        hr_time = next_time;
+    }
+}
+
 int main(int argc, char** argv) {
     UNUSED(argc);
     UNUSED(argv);
     int rc;
     uv_tty_t tty = {0};
     uv_timer_t timer = {0};
-
+    uv_idle_t idle = {0};
 
     debug_set_level(LL_DETAIL, WMQ_LOG_OPTION_USE_ODS | WMQ_LOG_OPTION_USE_STDERR | WMQ_LOG_OPTION_SHOW_TIME | WMQ_LOG_OPTION_SHOW_PID | WMQ_LOG_OPTION_SHOW_TID);
     WMQ_LOG(LL_INFO, "starting, sizeof(long unsigned int):%zu sizeof(int):%zu", sizeof(long unsigned int), sizeof(int));
@@ -109,6 +121,14 @@ int main(int argc, char** argv) {
 
     uv_timer_start(&timer, run_timer_cb, 0, 1);
 
+    //use idle handler for scheduler
+    hr_time = uv_hrtime();
+
+    rc = uv_idle_init(&libuv_loop, &idle);
+    WMQ_CHECK_ERROR_AND_RETURN_RESULT(rc, "uv_idle_init");
+
+    rc = uv_idle_start(&idle, on_idle);
+    WMQ_CHECK_ERROR_AND_RETURN_RESULT(rc, "uv_idle_start");
 
     //init STDIN reader
     rc = init_stdin(&libuv_loop, &tty);
