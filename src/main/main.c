@@ -91,12 +91,13 @@ static uint64_t hr_time;
 
 void on_idle(uv_idle_t *idle) {
     UNUSED(idle);
-    uint64_t next_time = uv_hrtime();
-    if (next_time-hr_time>10000){
-        scheduler();
-        processLoopback();
-        hr_time = next_time;
-    }
+    // uint64_t next_time = uv_hrtime();
+    // if (next_time-hr_time>10000){
+    //     scheduler();
+    //     processLoopback();
+    //     hr_time = next_time;
+    // }
+    scheduler();
 }
 
 int main(int argc, char** argv) {
