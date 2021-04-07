@@ -36,7 +36,6 @@
 
 #include <stdlib.h>
 #include <uv.h>
-#include "drivers/serial_libuv_init.h"
 
 #include "wmq_debug.h"
 #include "libuv_compat.h"
@@ -92,7 +91,6 @@ int main(int argc, char** argv) {
     UNUSED(argc);
     UNUSED(argv);
     int rc;
-    uv_loop_t loop = {0};
     uv_tty_t tty = {0};
     uv_timer_t timer = {0};
 
@@ -101,30 +99,28 @@ int main(int argc, char** argv) {
     WMQ_LOG(LL_INFO, "starting, sizeof(long unsigned int):%zu sizeof(int):%zu", sizeof(long unsigned int), sizeof(int));
 
     //init libuv message loop
-    rc = uv_loop_init(&loop);
+    rc = uv_loop_init(&libuv_loop);
     WMQ_CHECK_ERROR_AND_RETURN_RESULT(rc, "uv_loop_init");
-
-    init_serial_libuv_loop(&loop);
 
     init();
 
-    uv_timer_init(&loop, &timer);
+    uv_timer_init(&libuv_loop, &timer);
     WMQ_CHECK_ERROR_AND_RETURN_RESULT(rc, "uv_timer_init");
 
     uv_timer_start(&timer, run_timer_cb, 0, 1);
 
 
     //init STDIN reader
-    rc = init_stdin(&loop, &tty);
+    rc = init_stdin(&libuv_loop, &tty);
     WMQ_CHECK_ERROR_AND_RETURN_RESULT(rc, "init_stdin");
 
-    rc = uv_run(&loop, UV_RUN_DEFAULT);
+    rc = uv_run(&libuv_loop, UV_RUN_DEFAULT);
     WMQ_CHECK_ERROR_AND_RETURN_RESULT(rc, "uv_run");
 
-    uv_walk(&loop, on_walk_handles, NULL);
+    uv_walk(&libuv_loop, on_walk_handles, NULL);
 
     //close message loop
-    rc = uv_loop_close(&loop);
+    rc = uv_loop_close(&libuv_loop);
     WMQ_CHECK_ERROR_AND_RETURN_RESULT(rc, "uv_loop_close");
 
     return 0;

@@ -28,20 +28,18 @@
 
 #include "build/build_config.h"
 
+#include "scheduler/scheduler.h"
 #include "common/utils.h"
 
 #include "io/serial.h"
+
+
 #include "serial_libuv.h"
 #include "uv.h"
 #include "wmq_error.h"
 
+
 #define BASE_PORT 5760
-
-static uv_loop_t *libuv_loop;
-
-void init_serial_libuv_loop(uv_loop_t *loop){
-    libuv_loop = loop;
-}
 
 
 static const struct serialPortVTable libuvSerialVTable; // Forward declaration
@@ -171,7 +169,7 @@ static libuvSerialPort_t* libuvSerialInit(libuvSerialPort_t *s, int id)
     s->clientCount = 0;
     s->id = id;
 
-    rc = uv_tcp_init(libuv_loop, &s->server);
+    rc = uv_tcp_init(&libuv_loop, &s->server);
     WMQ_CHECK_ERROR(rc, "uv_tcp_init");
     if(rc){
         return NULL;

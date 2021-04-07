@@ -53,8 +53,14 @@ const timerHardware_t timerHardware[1]; // unused
 
 #include "rx/rx.h"
 
+#include "uv.h"
+
 #include "wmq_debug.h"
 #include "wmq_error.h"
+#include "loop_utils.h"
+
+
+uv_loop_t libuv_loop;
 
 uint32_t SystemCoreClock;
 
@@ -169,8 +175,7 @@ void updateState(const fdm_packet* pkt) {
 // system
 void systemInit(void) {
 
-    clock_gettime(CLOCK_MONOTONIC, &start_time);
-    printf("[system]Init...\n");
+    WMQ_LOG(LL_INFO, "");
 
     SystemCoreClock = 500 * 1e6; // fake 500MHz
 
@@ -179,9 +184,11 @@ void systemInit(void) {
 }
 
 void systemReset(void){
-    printf("[system]Reset!\n");
-    exit(0);
+    WMQ_LOG(LL_INFO, "");
+    close_all_handles(&libuv_loop);
+    //exit(0);
 }
+
 void systemResetToBootloader(bootloaderRequestType_e requestType) {
     UNUSED(requestType);
 

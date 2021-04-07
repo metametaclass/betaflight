@@ -26,6 +26,7 @@
 #include <stddef.h>
 
 #include "common/utils.h"
+#include "uv.h"
 
 #define TARGET_BOARD_IDENTIFIER "SITL2_LIBUV"
 
@@ -263,3 +264,4 @@ uint64_t millis64(void);
 int lockMainPID(void);
 
 
+extern uv_loop_t libuv_loop;
