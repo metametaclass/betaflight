@@ -263,5 +263,5 @@ uint64_t millis64(void);
 
 int lockMainPID(void);
 
-
+//global libuv event loop
 extern uv_loop_t libuv_loop;
