@@ -483,3 +483,20 @@ void debug_print_hex(int level, const char *msg, const void *data, size_t len, s
         debug_print(level, "%s", hex_buffer);
     }
 }
+
+
+void debug_error_event(const char *name){
+    fprintf(stderr, "debug_error_event: %s\n", name);
+    if(debug_file){
+        fprintf(debug_file, "debug_error_event: %s\n", name);
+        fflush(debug_file);
+    }
+}
+
+void debug_fflush(){
+    if(debug_file){
+        fflush(debug_file);
+    }
+    fflush(stderr);
+    fflush(stdout);
+}

@@ -67,16 +67,41 @@ void debug_fflush();
         debug_print((level), "%s " message, __func__, ##__VA_ARGS__); \
     } while (0)
 
+#define WMQ_LOG_DEBUG(message, ...)                                    \
+    do {                                                               \
+        debug_print(LL_DEBUG, "%s " message, __func__, ##__VA_ARGS__); \
+    } while (0)
+
+#define WMQ_LOG_DETAIL(message, ...)                                    \
+    do {                                                                \
+        debug_print(LL_DETAIL, "%s " message, __func__, ##__VA_ARGS__); \
+    } while (0)
+
+
+#define WMQ_LOG_INFO(message, ...)                                    \
+    do {                                                              \
+        debug_print(LL_INFO, "%s " message, __func__, ##__VA_ARGS__); \
+    } while (0)
+
+
+#define WMQ_LOG_WARN(message, ...)                                    \
+    do {                                                               \
+        debug_print(LL_WARN, "%s " message, __func__, ##__VA_ARGS__); \
+    } while (0)
+
+#define WMQ_LOG_ERROR(message, ...)                                                                                  \
+    do {                                                                                                             \
+        debug_error_event(__func__);                                                                                 \
+        debug_error_event(message);                                                                                  \
+        debug_print(LL_ERROR, "%s File:" __FILE__ " Line:" TOSTRING(__LINE__) " " message, __func__, ##__VA_ARGS__); \
+    } while (0)
+
+
 #define WMQ_LOG2(level, message, ...)               \
     do {                                            \
         debug_print((level), message, __VA_ARGS__); \
     } while (0)
 
-#define WMQ_ERROR(message, ...)                                                                                 \
-    do {                                                                                                        \
-        debug_error_event(__func__ " " message);                                                                \
-        debug_print(LL_ERROR, __func__ " File:" __FILE__ " Line:" TOSTRING(__LINE__) " " message, __VA_ARGS__); \
-    } while (0)
 
 #define WMQ_LOGW(level, message, ...)                                  \
     do {                                                               \
