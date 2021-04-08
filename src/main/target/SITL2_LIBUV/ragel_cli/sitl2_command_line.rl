@@ -20,15 +20,15 @@ static void for_debug(void)
   printf("for_debug\n");
 }
 
-static int parse_stdin_command(const char *data, int length)
+static int parse_sitl2_cli_command(const char *data, int length, int *is_exit)
 #else
-static int parse_stdin_command(servo_usb_control_context_t *ctx, const char *data, int length) 
+static int parse_sitl2_cli_command(servo_usb_control_context_t *ctx, const char *data, int length) 
 #endif
 {
 
     //int rc;
     const char *p = data, *pe = data + length;
-    const char *eof = pe;    
+    const char *eof = pe;
     const char *start = data;
 
     int tmp;
@@ -43,7 +43,7 @@ static int parse_stdin_command(servo_usb_control_context_t *ctx, const char *dat
 
         action on_start { 
 #ifdef TEST_RAGEL_PARSER
-            printf("on_start: %d \n", (int)(fpc-data)); 
+            printf(" on_start: %d \n", (int)(fpc-data)); 
 #else
 #endif
             start = fpc;
@@ -52,7 +52,7 @@ static int parse_stdin_command(servo_usb_control_context_t *ctx, const char *dat
 
         action on_start_quoted { 
 #ifdef TEST_RAGEL_PARSER
-            printf("on_start_quoted: %d \n", (int)(fpc-data)); 
+            printf(" on_start_quoted: %d \n", (int)(fpc-data)); 
 #else
 #endif
             start = fpc;
@@ -61,7 +61,7 @@ static int parse_stdin_command(servo_usb_control_context_t *ctx, const char *dat
 
         action on_end_key { 
 #ifdef TEST_RAGEL_PARSER
-            printf(">>on_end_key: %d \"%.*s\"\n", (int)(fpc-data), (int)(fpc-start), start); 
+            printf(" >>on_end_key: %d \"%.*s\"\n", (int)(fpc-data), (int)(fpc-start), start); 
 #else
 #endif
             key = start;
@@ -71,7 +71,7 @@ static int parse_stdin_command(servo_usb_control_context_t *ctx, const char *dat
 
         action on_end_value { 
 #ifdef TEST_RAGEL_PARSER
-            printf(">>on_end_value: %d %d %d \"%.*s\":\"%.*s\" q:%d\n", (int)(fpc-data), key_size,  (int)(fpc-start), key_size, key, (int)(fpc-start), start, quoted); 
+            printf(" >>on_end_value: %d %d %d \"%.*s\":\"%.*s\" q:%d\n", (int)(fpc-data), key_size,  (int)(fpc-start), key_size, key, (int)(fpc-start), start, quoted); 
 #else
             rc = cb(context, key_size, key, (int)(fpc-start), start, quoted);
             if(rc){
@@ -84,32 +84,40 @@ static int parse_stdin_command(servo_usb_control_context_t *ctx, const char *dat
 
         action error { 
 #ifdef TEST_RAGEL_PARSER
-            printf("error at %d \"%s\"\n", (int)(fpc-start), fpc); 
+            printf(" error at %d \"%s\"\n", (int)(fpc-start), fpc); 
 #endif
             //return -1;
         }
 
         action on_eof { 
 #ifdef TEST_RAGEL_PARSER
-            printf("eof at %d\n", (int)(fpc-start));
+            printf(" eof at %d\n", (int)(fpc-start));
 #endif
         }
 
 
         action status { 
 #ifdef TEST_RAGEL_PARSER
-            printf("STATUS\n");
+            printf(" STATUS\n");
 #else
-            
-            sitl2_cli_STATUS(ctx);            
+            sitl2_cli_STATUS(ctx);
+#endif
+        }
+
+        action exit{ 
+#ifdef TEST_RAGEL_PARSER
+            printf(" EXIT\n");
+            *is_exit = 1;
+#else
+            sitl2_cli_EXIT(ctx);
 #endif
         }
 
 
         action comment { 
 #ifdef TEST_RAGEL_PARSER
-            printf("COMMENT\n");
-#else            
+            printf(" COMMENT\n");
+#else
 #endif
         }
 
@@ -135,7 +143,9 @@ static int parse_stdin_command(servo_usb_control_context_t *ctx, const char *dat
 
         # | ( (any*) %unknown_command )
 
-        main := (( "status" space* ('(' space*  ')')? %status space* )  |
+        main := (("status" space* ('(' space*  ')')? space* ) %status |
+                 ("exit" space* ('(' space* ')')?  space* ) %exit |
+                 ("q" space* ) %exit |
                  ( ( "//" any*) %comment)
                 ) $err(error) $eof(on_eof);
                       
@@ -145,17 +155,17 @@ static int parse_stdin_command(servo_usb_control_context_t *ctx, const char *dat
     }%%
 
 #ifdef TEST_RAGEL_PARSER
-    printf("cs: %d\n", cs);
+    printf(" cs: %d\n", cs);
 #endif
 
     if(cs==sitl2_command_line_error){
-       printf("error\n");
+       printf(" error\n");
        return -1;
     }
 
     if(cs>=sitl2_command_line_first_final){
 #ifdef TEST_RAGEL_PARSER
-       printf("ok\n");
+       printf(" ok\n");
 #endif
 
        return 0;
@@ -175,16 +185,14 @@ static int parse_stdin_command(servo_usb_control_context_t *ctx, const char *dat
 int main()
 {
     int rc;
-    int is_quit=0;
+    int is_exit=0;
     char buf[BUFSIZE];
-
-    //rc = parse_stdin_command("quit\r\n", &is_quit);
 
     while ( fgets( buf, sizeof(buf), stdin ) != 0 ) {
         printf( "buf:%s", buf);
-        rc = parse_stdin_command(buf, strlen(buf));
+        rc = parse_sitl2_cli_command(buf, strlen(buf), &is_exit);
         printf( "rc:%d\n\n", rc );
-        if(is_quit){
+        if(is_exit){
            break;
         }
     }

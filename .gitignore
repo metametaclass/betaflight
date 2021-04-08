@@ -53,4 +53,6 @@ ubuntu*.log
 eeprom.bin
 
 src/main/target/SITL2_LIBUV/ragel_cli/*.dot
+src/main/target/SITL2_LIBUV/ragel_cli/*.cmd
+src/main/target/SITL2_LIBUV/ragel_cli/*.png
 src/main/target/SITL2_LIBUV/ragel_cli/sitl2_command_line
