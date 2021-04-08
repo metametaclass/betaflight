@@ -363,6 +363,20 @@ typedef struct {
 
 int sitl2_cli_STATUS(sitl2_cli_context_t *ctx){
     printf("System Uptime: %d seconds\n", millis() / 1000);
+
+
+    const int gyroRate = getTaskDeltaTimeUs(TASK_GYRO) == 0 ? 0 : (int)(1000000.0f / ((float)getTaskDeltaTimeUs(TASK_GYRO)));
+    int rxRate = getCurrentRxRefreshRate();
+    if (rxRate != 0) {
+        rxRate = (int)(1000000.0f / ((float)rxRate));
+    }
+    const int systemRate = getTaskDeltaTimeUs(TASK_SYSTEM) == 0 ? 0 : (int)(1000000.0f / ((float)getTaskDeltaTimeUs(TASK_SYSTEM)));
+    printf("CPU:%d%%, cycle time: %d, GYRO rate: %d, RX rate: %d, System rate: %d\n",
+            constrain(getAverageSystemLoadPercent(), 0, 100), getTaskDeltaTimeUs(TASK_GYRO), gyroRate, rxRate, systemRate);
+
+    // Battery meter
+    //printf("Voltage: %d * 0.01V (%dS battery - %s)\n", getBatteryVoltage(), getBatteryCellCount(), getBatteryStateString());
+
     printf("Arming disable flags:");
     armingDisableFlags_e flags = getArmingDisableFlags();
     while (flags) {
