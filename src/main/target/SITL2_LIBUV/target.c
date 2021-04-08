@@ -57,7 +57,9 @@ const timerHardware_t timerHardware[1]; // unused
 
 #include "wmq_debug.h"
 #include "wmq_error.h"
+#include "libuv_compat.h"
 #include "loop_utils.h"
+
 
 
 uv_loop_t libuv_loop;
@@ -78,7 +80,7 @@ static uint64_t start_hrtime;
 // system
 void systemInit(void) {
 
-    WMQ_LOG(LL_INFO, "");
+    WMQ_LOG_INFO("");
 
     SystemCoreClock = 500 * 1e6; // fake 500MHz
 
@@ -90,7 +92,7 @@ void systemInit(void) {
 }
 
 void systemReset(void){
-    WMQ_LOG(LL_INFO, "");
+    WMQ_LOG_INFO("");
     close_all_handles(&libuv_loop);
     //exit(0);
 }
@@ -98,26 +100,27 @@ void systemReset(void){
 void systemResetToBootloader(bootloaderRequestType_e requestType) {
     UNUSED(requestType);
 
-    printf("[system]ResetToBootloader!\n");
+    WMQ_LOG_INFO("");
     exit(0);
 }
 
 void timerInit(void) {
-    printf("[timer]Init...\n");
+    WMQ_LOG_INFO("");
 }
 
 void timerStart(void) {
+    WMQ_LOG_INFO("");
 }
 
 void failureMode(failureMode_e mode) {
-    printf("[failureMode]!!! %d\n", mode);
-    while (1);
+    WMQ_LOG_INFO("%d", mode);
+    exit(0);
 }
 
 void indicateFailure(failureMode_e mode, int repeatCount)
 {
     UNUSED(repeatCount);
-    printf("Failure LED flash for: [failureMode]!!! %d\n", mode);
+    WMQ_LOG_INFO("LED flash for failureMode: %d", mode);
 }
 
 /*
@@ -209,6 +212,9 @@ void delayMicroseconds(timeUs_t us)
     uv_sleep(1);
 }
 
+//TODO: use float division 
+//https://stackoverflow.com/questions/55832817/why-float-division-is-faster-than-integer-division-in-c
+
 uint32_t micros(void) {
     uint64_t hrtime = uv_hrtime();
     return ((hrtime - start_hrtime)/1000) & 0xFFFFFFFF;
@@ -253,13 +259,14 @@ static uint16_t pwmConvertToExternal(float motorValue)
 
 static void pwmDisableMotors(void)
 {
+    WMQ_LOG_DETAIL("");
     motorPwmDevice.enabled = false;
 }
 
 static bool pwmEnableMotors(void)
 {
+    WMQ_LOG_DETAIL("");
     motorPwmDevice.enabled = true;
-
     return true;
 }
 
@@ -275,6 +282,7 @@ static void pwmWriteMotorInt(uint8_t index, uint16_t value)
 
 static void pwmShutdownPulsesForAllMotors(void)
 {
+    WMQ_LOG_DETAIL("");
     motorPwmDevice.enabled = false;
 }
 
@@ -297,8 +305,7 @@ static void pwmCompleteMotorUpdate(void)
     pwmPkt.motor_speed[1] = motorsPwm[2] / outScale;
     pwmPkt.motor_speed[2] = motorsPwm[3] / outScale;
 
-    //udpSend(&pwmLink, &pwmPkt, sizeof(servo_packet));
-//   printf("[pwm]%u:%u,%u,%u,%u\n", idlePulse, motorsPwm[0], motorsPwm[1], motorsPwm[2], motorsPwm[3]);
+    //WMQ_LOG_DETAIL("%u:%u,%u,%u,%u", idlePulse, motorsPwm[0], motorsPwm[1], motorsPwm[2], motorsPwm[3]);
 }
 
 void pwmWriteServo(uint8_t index, float value) {
@@ -357,7 +364,7 @@ static FILE *eepromFd = NULL;
 
 void FLASH_Unlock(void) {
     if (eepromFd != NULL) {
-        fprintf(stderr, "[FLASH_Unlock] eepromFd != NULL\n");
+        WMQ_LOG_DETAIL("eepromFd != NULL");
         return;
     }
 
@@ -371,19 +378,19 @@ void FLASH_Unlock(void) {
 
         size_t n = fread(eepromData, 1, sizeof(eepromData), eepromFd);
         if (n == lSize) {
-            printf("[FLASH_Unlock] loaded '%s', size = %zu / %zu\n", EEPROM_FILENAME, lSize, sizeof(eepromData));
+            WMQ_LOG_INFO("loaded '%s', size = %zu / %zu", EEPROM_FILENAME, lSize, sizeof(eepromData));
         } else {
-            fprintf(stderr, "[FLASH_Unlock] failed to read '%s' %zu %zu\n", EEPROM_FILENAME, n, lSize);
+            WMQ_LOG_ERROR("failed to read '%s' %zu %zu", EEPROM_FILENAME, n, lSize);
             return;
         }
     } else {
-        printf("[FLASH_Unlock] created '%s', size = %zu\n", EEPROM_FILENAME, sizeof(eepromData));
+        WMQ_LOG_INFO("created '%s', size = %zu", EEPROM_FILENAME, sizeof(eepromData));
         if ((eepromFd = fopen(EEPROM_FILENAME, "wb+")) == NULL) {
-            fprintf(stderr, "[FLASH_Unlock] failed to create '%s'\n", EEPROM_FILENAME);
+            WMQ_LOG_ERROR("failed to create '%s'", EEPROM_FILENAME);
             return;
         }
         if (fwrite(eepromData, sizeof(eepromData), 1, eepromFd) != 1) {
-            fprintf(stderr, "[FLASH_Unlock] write failed: %s\n", strerror(errno));
+            WMQ_LOG_ERROR("write failed: %s", strerror(errno));
         }
     }
 }
@@ -395,24 +402,24 @@ void FLASH_Lock(void) {
         size_t written = fwrite(eepromData, 1, sizeof(eepromData), eepromFd);
         fclose(eepromFd);
         eepromFd = NULL;
-        printf("[FLASH_Lock] saved '%s' %zu\n", EEPROM_FILENAME, written);
+        WMQ_LOG_INFO("saved '%s' %zu", EEPROM_FILENAME, written);
     } else {
-        fprintf(stderr, "[FLASH_Lock] eeprom is not unlocked\n");
+        WMQ_LOG_ERROR("eeprom is not unlocked");
     }
 }
 
 FLASH_Status FLASH_ErasePage(uintptr_t Page_Address) {
-    UNUSED(Page_Address);
-//    printf("[FLASH_ErasePage]%x\n", Page_Address);
+    //UNUSED(Page_Address);
+    WMQ_LOG_DEBUG("%x", Page_Address);
     return FLASH_COMPLETE;
 }
 
 FLASH_Status FLASH_ProgramWord(uintptr_t addr, uint32_t value) {
     if ((addr >= (uintptr_t)eepromData) && (addr < (uintptr_t)ARRAYEND(eepromData))) {
         *((uint32_t*)addr) = value;
-        WMQ_LOG(LL_DEBUG, "%p = %08x\n", (void*)addr, *((uint32_t*)addr));
+        WMQ_LOG_DEBUG("%p = %08x", (void*)addr, *((uint32_t*)addr));
     } else {
-        WMQ_LOG(LL_WARN, "%p out of range", (void*)addr);
+        WMQ_LOG_WARN("%p out of range", (void*)addr);
     }
     return FLASH_COMPLETE;
 }
@@ -421,16 +428,16 @@ void IOConfigGPIO(IO_t io, ioConfig_t cfg)
 {
     UNUSED(io);
     UNUSED(cfg);
-    printf("IOConfigGPIO\n");
+    WMQ_LOG_DETAIL("");
 }
 
 void spektrumBind(rxConfig_t *rxConfig)
 {
     UNUSED(rxConfig);
-    printf("spektrumBind\n");
+    WMQ_LOG_DETAIL("");
 }
 
 void unusedPinsInit(void)
 {
-    printf("unusedPinsInit\n");
+    WMQ_LOG_DETAIL("");
 }

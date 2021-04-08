@@ -235,7 +235,7 @@ static void dynLpfFilterInit()
 
 void gyroInitFilters(void)
 {
-    SITL_DEBUG_LOG();
+    SITL_DEBUG_LOG("");
     uint16_t gyro_lowpass_hz = gyroConfig()->gyro_lowpass_hz;
 
 #ifdef USE_DYN_LPF
