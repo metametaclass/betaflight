@@ -51,3 +51,6 @@ ubuntu*.log
 
 # EEPROM image file (created by SITL)
 eeprom.bin
+
+src/main/target/SITL2_LIBUV/ragel_cli/*.dot
+src/main/target/SITL2_LIBUV/ragel_cli/sitl2_command_line
