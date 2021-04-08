@@ -22,3 +22,21 @@ const char* uv_handle_type_name(uv_handle_type type) {
     return NULL;
 }
 #endif
+
+
+#if UV_VERSION_MINOR < 34
+
+#ifdef _WIN32
+void uv_sleep(int msec) {
+  Sleep(msec);
+}
+#else
+
+#include <unistd.h>
+
+void uv_sleep(int msec) {
+  usleep(msec * 1000);
+}
+#endif
+
+#endif

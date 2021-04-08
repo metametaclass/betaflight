@@ -9,3 +9,9 @@ uv_handle_type uv_handle_get_type(const uv_handle_t* handle);
 const char* uv_handle_type_name(uv_handle_type type);
 
 #endif
+
+#if UV_VERSION_MINOR < 34
+
+void uv_sleep(unsigned int msec);
+
+#endif
