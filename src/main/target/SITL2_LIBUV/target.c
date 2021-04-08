@@ -60,7 +60,7 @@ const timerHardware_t timerHardware[1]; // unused
 #include "libuv_compat.h"
 #include "loop_utils.h"
 
-
+#include "fc/runtime_config.h"
 
 uv_loop_t libuv_loop;
 
@@ -354,6 +354,44 @@ uint16_t adcGetChannel(uint8_t channel) {
     UNUSED(channel);
     return 0;
 }
+
+//command line parser
+
+typedef struct {
+    int is_exit;
+} sitl2_cli_context_t;
+
+int sitl2_cli_STATUS(sitl2_cli_context_t *ctx){
+    printf("System Uptime: %d seconds\n", millis() / 1000);
+    printf("Arming disable flags:");
+    armingDisableFlags_e flags = getArmingDisableFlags();
+    while (flags) {
+        const int bitpos = ffs(flags) - 1;
+        flags &= ~(1 << bitpos);
+        printf(" %s", armingDisableFlagNames[bitpos]);
+    }
+    printf("\n");
+    return 0;
+}
+
+int sitl2_cli_EXIT(sitl2_cli_context_t *ctx){
+    ctx->is_exit = 1;
+    return 0;
+}
+
+#include "ragel_cli/sitl2_command_line.inc"
+
+int sitl2_parse_command_line(char *data, size_t size){
+    sitl2_cli_context_t ctx = {0};
+    int rc = parse_sitl2_cli_command(&ctx, data, size);
+    WMQ_CHECK_ERROR_AND_RETURN_RESULT(rc, "parse_sitl2_cli_command");
+    if(ctx.is_exit){
+        WMQ_LOG_DETAIL("exiting");
+        close_all_handles(&libuv_loop);
+    }
+    return rc;
+}
+
 
 // stack part
 char _estack;

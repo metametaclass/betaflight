@@ -6,42 +6,106 @@
 #include <string.h>
 #include <stdio.h>
 
+#define WMQE_INVALID_CLI_COMMAND -1
+#define WMQE_PARSE_ERROR -1
+
 #endif
 
 #define MAX_CALL_PARAMS 3
 
 
-/* #line 15 "sitl2_command_line.inc" */
+/* #line 18 "sitl2_command_line.inc" */
+static const char _sitl2_command_line_key_offsets[] = {
+	0, 0, 4, 5, 6, 7, 8, 12, 
+	13, 14, 15, 16, 20, 20, 24, 27, 
+	31, 34
+};
+
+static const char _sitl2_command_line_trans_keys[] = {
+	47, 101, 113, 115, 47, 120, 105, 116, 
+	32, 41, 9, 13, 116, 116, 117, 115, 
+	32, 41, 9, 13, 32, 40, 9, 13, 
+	32, 9, 13, 32, 97, 9, 13, 32, 
+	9, 13, 32, 40, 9, 13, 0
+};
+
+static const char _sitl2_command_line_single_lengths[] = {
+	0, 4, 1, 1, 1, 1, 2, 1, 
+	1, 1, 1, 2, 0, 2, 1, 2, 
+	1, 2
+};
+
+static const char _sitl2_command_line_range_lengths[] = {
+	0, 0, 0, 0, 0, 0, 1, 0, 
+	0, 0, 0, 1, 0, 1, 1, 1, 
+	1, 1
+};
+
+static const char _sitl2_command_line_index_offsets[] = {
+	0, 0, 5, 7, 9, 11, 13, 17, 
+	19, 21, 23, 25, 29, 30, 34, 37, 
+	41, 44
+};
+
+static const char _sitl2_command_line_indicies[] = {
+	1, 2, 3, 4, 0, 5, 0, 6, 
+	0, 7, 0, 8, 0, 9, 3, 9, 
+	0, 10, 0, 11, 0, 12, 0, 13, 
+	0, 14, 15, 14, 0, 5, 8, 9, 
+	8, 0, 3, 3, 0, 15, 16, 15, 
+	0, 15, 15, 0, 13, 14, 13, 0, 
+	0
+};
+
+static const char _sitl2_command_line_trans_targs[] = {
+	0, 2, 3, 14, 7, 12, 4, 5, 
+	13, 6, 15, 9, 10, 17, 11, 16, 
+	8
+};
+
+static const char _sitl2_command_line_trans_actions[] = {
+	2, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0
+};
+
+static const char _sitl2_command_line_eof_actions[] = {
+	0, 1, 1, 1, 1, 1, 1, 1, 
+	1, 1, 1, 1, 3, 4, 4, 5, 
+	5, 5
+};
+
 static const int sitl2_command_line_start = 1;
-static const int sitl2_command_line_first_final = 13;
+static const int sitl2_command_line_first_final = 12;
 static const int sitl2_command_line_error = 0;
 
 static const int sitl2_command_line_en_main = 1;
 
 
-/* #line 14 "sitl2_command_line.rl" */
+/* #line 17 "sitl2_command_line.rl" */
 
 
 #ifdef TEST_RAGEL_PARSER
 
+/*
 static void for_debug(void)
 {
   printf("for_debug\n");
-}
+}*/
 
-static int parse_sitl2_cli_command(const char *data, int length, int *is_exit)
+static int parse_sitl2_cli_command(const char *data, size_t length, int *is_exit)
 #else
-static int parse_sitl2_cli_command(servo_usb_control_context_t *ctx, const char *data, int length) 
+static int parse_sitl2_cli_command(sitl2_cli_context_t *ctx, const char *data, size_t length) 
 #endif
 {
 
-    //int rc;
+    int rc;
     const char *p = data, *pe = data + length;
     const char *eof = pe;
     const char *start = data;
 
-    int tmp;
-    int sign = 1;
+//    int tmp;
+//    int sign = 1;
    
     int params[MAX_CALL_PARAMS] = {0};
     int param_num = 0;
@@ -49,274 +113,172 @@ static int parse_sitl2_cli_command(servo_usb_control_context_t *ctx, const char 
     int cs;
 
     
-/* #line 53 "sitl2_command_line.inc" */
+/* #line 117 "sitl2_command_line.inc" */
 	{
 	cs = sitl2_command_line_start;
 	}
 
-/* #line 58 "sitl2_command_line.inc" */
+/* #line 122 "sitl2_command_line.inc" */
 	{
+	int _klen;
+	const char *_keys;
+	int _trans;
+
 	if ( p == pe )
 		goto _test_eof;
-	switch ( cs )
-	{
-case 1:
-	switch( (*p) ) {
-		case 47: goto st2;
-		case 101: goto st3;
-		case 113: goto st15;
-		case 115: goto st7;
+	if ( cs == 0 )
+		goto _out;
+_resume:
+	_keys = _sitl2_command_line_trans_keys + _sitl2_command_line_key_offsets[cs];
+	_trans = _sitl2_command_line_index_offsets[cs];
+
+	_klen = _sitl2_command_line_single_lengths[cs];
+	if ( _klen > 0 ) {
+		const char *_lower = _keys;
+		const char *_mid;
+		const char *_upper = _keys + _klen - 1;
+		while (1) {
+			if ( _upper < _lower )
+				break;
+
+			_mid = _lower + ((_upper-_lower) >> 1);
+			if ( (*p) < *_mid )
+				_upper = _mid - 1;
+			else if ( (*p) > *_mid )
+				_lower = _mid + 1;
+			else {
+				_trans += (unsigned int)(_mid - _keys);
+				goto _match;
+			}
+		}
+		_keys += _klen;
+		_trans += _klen;
 	}
-	goto tr0;
-tr0:
-/* #line 85 "sitl2_command_line.rl" */
+
+	_klen = _sitl2_command_line_range_lengths[cs];
+	if ( _klen > 0 ) {
+		const char *_lower = _keys;
+		const char *_mid;
+		const char *_upper = _keys + (_klen<<1) - 2;
+		while (1) {
+			if ( _upper < _lower )
+				break;
+
+			_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+			if ( (*p) < _mid[0] )
+				_upper = _mid - 2;
+			else if ( (*p) > _mid[1] )
+				_lower = _mid + 2;
+			else {
+				_trans += (unsigned int)((_mid - _keys)>>1);
+				goto _match;
+			}
+		}
+		_trans += _klen;
+	}
+
+_match:
+	_trans = _sitl2_command_line_indicies[_trans];
+	cs = _sitl2_command_line_trans_targs[_trans];
+
+	if ( _sitl2_command_line_trans_actions[_trans] == 0 )
+		goto _again;
+
+	switch ( _sitl2_command_line_trans_actions[_trans] ) {
+	case 2:
+/* #line 89 "sitl2_command_line.rl" */
 	{ 
 #ifdef TEST_RAGEL_PARSER
             printf(" error at %d \"%s\"\n", (int)(p-start), p); 
 #endif
-            //return -1;
+            return WMQE_INVALID_CLI_COMMAND;
         }
-	goto st0;
-/* #line 81 "sitl2_command_line.inc" */
-st0:
-cs = 0;
-	goto _out;
-st2:
-	if ( ++p == pe )
-		goto _test_eof2;
-case 2:
-	if ( (*p) == 47 )
-		goto st13;
-	goto tr0;
-st13:
-	if ( ++p == pe )
-		goto _test_eof13;
-case 13:
-	goto st13;
-st3:
-	if ( ++p == pe )
-		goto _test_eof3;
-case 3:
-	if ( (*p) == 120 )
-		goto st4;
-	goto tr0;
-st4:
-	if ( ++p == pe )
-		goto _test_eof4;
-case 4:
-	if ( (*p) == 105 )
-		goto st5;
-	goto tr0;
-st5:
-	if ( ++p == pe )
-		goto _test_eof5;
-case 5:
-	if ( (*p) == 116 )
-		goto st14;
-	goto tr0;
-st14:
-	if ( ++p == pe )
-		goto _test_eof14;
-case 14:
-	switch( (*p) ) {
-		case 32: goto st14;
-		case 40: goto st6;
+	break;
+/* #line 198 "sitl2_command_line.inc" */
 	}
-	if ( 9 <= (*p) && (*p) <= 13 )
-		goto st14;
-	goto tr0;
-st6:
-	if ( ++p == pe )
-		goto _test_eof6;
-case 6:
-	switch( (*p) ) {
-		case 32: goto st6;
-		case 41: goto st15;
-	}
-	if ( 9 <= (*p) && (*p) <= 13 )
-		goto st6;
-	goto tr0;
-st15:
-	if ( ++p == pe )
-		goto _test_eof15;
-case 15:
-	if ( (*p) == 32 )
-		goto st15;
-	if ( 9 <= (*p) && (*p) <= 13 )
-		goto st15;
-	goto tr0;
-st7:
-	if ( ++p == pe )
-		goto _test_eof7;
-case 7:
-	if ( (*p) == 116 )
-		goto st8;
-	goto tr0;
-st8:
-	if ( ++p == pe )
-		goto _test_eof8;
-case 8:
-	if ( (*p) == 97 )
-		goto st9;
-	goto tr0;
-st9:
-	if ( ++p == pe )
-		goto _test_eof9;
-case 9:
-	if ( (*p) == 116 )
-		goto st10;
-	goto tr0;
-st10:
-	if ( ++p == pe )
-		goto _test_eof10;
-case 10:
-	if ( (*p) == 117 )
-		goto st11;
-	goto tr0;
-st11:
-	if ( ++p == pe )
-		goto _test_eof11;
-case 11:
-	if ( (*p) == 115 )
-		goto st16;
-	goto tr0;
-st16:
-	if ( ++p == pe )
-		goto _test_eof16;
-case 16:
-	switch( (*p) ) {
-		case 32: goto st16;
-		case 40: goto st12;
-	}
-	if ( 9 <= (*p) && (*p) <= 13 )
-		goto st16;
-	goto tr0;
-st12:
-	if ( ++p == pe )
-		goto _test_eof12;
-case 12:
-	switch( (*p) ) {
-		case 32: goto st12;
-		case 41: goto st17;
-	}
-	if ( 9 <= (*p) && (*p) <= 13 )
-		goto st12;
-	goto tr0;
-st17:
-	if ( ++p == pe )
-		goto _test_eof17;
-case 17:
-	if ( (*p) == 32 )
-		goto st17;
-	if ( 9 <= (*p) && (*p) <= 13 )
-		goto st17;
-	goto tr0;
-	}
-	_test_eof2: cs = 2; goto _test_eof; 
-	_test_eof13: cs = 13; goto _test_eof; 
-	_test_eof3: cs = 3; goto _test_eof; 
-	_test_eof4: cs = 4; goto _test_eof; 
-	_test_eof5: cs = 5; goto _test_eof; 
-	_test_eof14: cs = 14; goto _test_eof; 
-	_test_eof6: cs = 6; goto _test_eof; 
-	_test_eof15: cs = 15; goto _test_eof; 
-	_test_eof7: cs = 7; goto _test_eof; 
-	_test_eof8: cs = 8; goto _test_eof; 
-	_test_eof9: cs = 9; goto _test_eof; 
-	_test_eof10: cs = 10; goto _test_eof; 
-	_test_eof11: cs = 11; goto _test_eof; 
-	_test_eof16: cs = 16; goto _test_eof; 
-	_test_eof12: cs = 12; goto _test_eof; 
-	_test_eof17: cs = 17; goto _test_eof; 
 
+_again:
+	if ( cs == 0 )
+		goto _out;
+	if ( ++p != pe )
+		goto _resume;
 	_test_eof: {}
 	if ( p == eof )
 	{
-	switch ( cs ) {
-	case 1: 
-	case 2: 
-	case 3: 
-	case 4: 
-	case 5: 
-	case 6: 
-	case 7: 
-	case 8: 
-	case 9: 
-	case 10: 
-	case 11: 
-	case 12: 
-/* #line 85 "sitl2_command_line.rl" */
+	switch ( _sitl2_command_line_eof_actions[cs] ) {
+	case 1:
+/* #line 89 "sitl2_command_line.rl" */
 	{ 
 #ifdef TEST_RAGEL_PARSER
             printf(" error at %d \"%s\"\n", (int)(p-start), p); 
 #endif
-            //return -1;
+            return WMQE_INVALID_CLI_COMMAND;
         }
-/* #line 92 "sitl2_command_line.rl" */
+/* #line 96 "sitl2_command_line.rl" */
 	{ 
 #ifdef TEST_RAGEL_PARSER
             printf(" eof at %d\n", (int)(p-start));
 #endif
         }
 	break;
-	case 16: 
-	case 17: 
-/* #line 99 "sitl2_command_line.rl" */
+	case 5:
+/* #line 103 "sitl2_command_line.rl" */
 	{ 
 #ifdef TEST_RAGEL_PARSER
             printf(" STATUS\n");
 #else
-            sitl2_cli_STATUS(ctx);
+            rc = sitl2_cli_STATUS(ctx);
+            WMQ_CHECK_ERROR_AND_RETURN_RESULT(rc, "sitl2_cli_STATUS");
 #endif
         }
-/* #line 92 "sitl2_command_line.rl" */
+/* #line 96 "sitl2_command_line.rl" */
 	{ 
 #ifdef TEST_RAGEL_PARSER
             printf(" eof at %d\n", (int)(p-start));
 #endif
         }
 	break;
-	case 14: 
-	case 15: 
-/* #line 107 "sitl2_command_line.rl" */
+	case 4:
+/* #line 112 "sitl2_command_line.rl" */
 	{ 
 #ifdef TEST_RAGEL_PARSER
             printf(" EXIT\n");
             *is_exit = 1;
 #else
-            sitl2_cli_EXIT(ctx);
+            rc = sitl2_cli_EXIT(ctx);
+            WMQ_CHECK_ERROR_AND_RETURN_RESULT(rc, "sitl2_cli_EXIT");
 #endif
         }
-/* #line 92 "sitl2_command_line.rl" */
+/* #line 96 "sitl2_command_line.rl" */
 	{ 
 #ifdef TEST_RAGEL_PARSER
             printf(" eof at %d\n", (int)(p-start));
 #endif
         }
 	break;
-	case 13: 
-/* #line 117 "sitl2_command_line.rl" */
+	case 3:
+/* #line 123 "sitl2_command_line.rl" */
 	{ 
 #ifdef TEST_RAGEL_PARSER
             printf(" COMMENT\n");
 #else
 #endif
         }
-/* #line 92 "sitl2_command_line.rl" */
+/* #line 96 "sitl2_command_line.rl" */
 	{ 
 #ifdef TEST_RAGEL_PARSER
             printf(" eof at %d\n", (int)(p-start));
 #endif
         }
 	break;
-/* #line 313 "sitl2_command_line.inc" */
+/* #line 275 "sitl2_command_line.inc" */
 	}
 	}
 
 	_out: {}
 	}
 
-/* #line 155 "sitl2_command_line.rl" */
+/* #line 162 "sitl2_command_line.rl" */
 
 
 #ifdef TEST_RAGEL_PARSER
@@ -325,7 +287,7 @@ case 17:
 
     if(cs==sitl2_command_line_error){
        printf(" error\n");
-       return -1;
+       return WMQE_PARSE_ERROR;
     }
 
     if(cs>=sitl2_command_line_first_final){
@@ -338,8 +300,8 @@ case 17:
     printf("unknown command\n");
 
 
-    return -2;
-};
+    return WMQE_PARSE_ERROR;
+}
 
 
 #ifdef TEST_RAGEL_PARSER

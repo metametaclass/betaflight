@@ -265,3 +265,6 @@ uint64_t millis64(void);
 
 //global libuv event loop
 extern uv_loop_t libuv_loop;
+
+
+int sitl2_parse_command_line(char *data, size_t size);

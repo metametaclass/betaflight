@@ -46,16 +46,16 @@
 
 //stdin read callback
 static void on_tty_read(uv_stream_t* tty_in, ssize_t nread, const uv_buf_t* buf) {
+    int rc;
     if (nread <= 0) {
         WMQ_LOG(LL_INFO, "EOF or error: %d", nread);
         close_all_handles(tty_in->loop);
     } else {
-        //debug_print_hex(LL_INFO, __func__, buf->base, nread, 0);
-        //WMQ_LOG(LL_INFO, "%zu: %.*s", nread, nread, buf->base);
-        debug_print_hex(LL_INFO, "", buf->base, nread, 0);
-        if (strncmp(buf->base, "exit", 4) == 0) {
-            WMQ_LOG(LL_INFO, "exit command received");
-            close_all_handles(tty_in->loop);
+        debug_print_hex(LL_DEBUG, "", buf->base, nread, 0);
+        rc = sitl2_parse_command_line(buf->base, nread);
+        WMQ_CHECK_ERROR(rc, "sitl2_parse_command_line");
+        if(rc){
+            debug_print_hex(LL_WARN, "", buf->base, nread, 0);
         }
     }
 }

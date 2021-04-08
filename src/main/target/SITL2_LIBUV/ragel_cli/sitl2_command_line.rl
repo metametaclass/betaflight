@@ -4,6 +4,9 @@
 #include <string.h>
 #include <stdio.h>
 
+#define WMQE_INVALID_CLI_COMMAND -1
+#define WMQE_PARSE_ERROR -1
+
 #endif
 
 #define MAX_CALL_PARAMS 3
@@ -15,24 +18,25 @@
 
 #ifdef TEST_RAGEL_PARSER
 
+/*
 static void for_debug(void)
 {
   printf("for_debug\n");
-}
+}*/
 
-static int parse_sitl2_cli_command(const char *data, int length, int *is_exit)
+static int parse_sitl2_cli_command(const char *data, size_t length, int *is_exit)
 #else
-static int parse_sitl2_cli_command(servo_usb_control_context_t *ctx, const char *data, int length) 
+static int parse_sitl2_cli_command(sitl2_cli_context_t *ctx, const char *data, size_t length) 
 #endif
 {
 
-    //int rc;
+    int rc;
     const char *p = data, *pe = data + length;
     const char *eof = pe;
     const char *start = data;
 
-    int tmp;
-    int sign = 1;
+//    int tmp;
+//    int sign = 1;
    
     int params[MAX_CALL_PARAMS] = {0};
     int param_num = 0;
@@ -86,7 +90,7 @@ static int parse_sitl2_cli_command(servo_usb_control_context_t *ctx, const char 
 #ifdef TEST_RAGEL_PARSER
             printf(" error at %d \"%s\"\n", (int)(fpc-start), fpc); 
 #endif
-            //return -1;
+            return WMQE_INVALID_CLI_COMMAND;
         }
 
         action on_eof { 
@@ -100,7 +104,8 @@ static int parse_sitl2_cli_command(servo_usb_control_context_t *ctx, const char 
 #ifdef TEST_RAGEL_PARSER
             printf(" STATUS\n");
 #else
-            sitl2_cli_STATUS(ctx);
+            rc = sitl2_cli_STATUS(ctx);
+            WMQ_CHECK_ERROR_AND_RETURN_RESULT(rc, "sitl2_cli_STATUS");
 #endif
         }
 
@@ -109,7 +114,8 @@ static int parse_sitl2_cli_command(servo_usb_control_context_t *ctx, const char 
             printf(" EXIT\n");
             *is_exit = 1;
 #else
-            sitl2_cli_EXIT(ctx);
+            rc = sitl2_cli_EXIT(ctx);
+            WMQ_CHECK_ERROR_AND_RETURN_RESULT(rc, "sitl2_cli_EXIT");
 #endif
         }
 
@@ -143,7 +149,8 @@ static int parse_sitl2_cli_command(servo_usb_control_context_t *ctx, const char 
 
         # | ( (any*) %unknown_command )
 
-        main := (("status" space* ('(' space*  ')')? space* ) %status |
+        main := (("st" space*) %status |
+                 ("status" space* ('(' space*  ')')? space* ) %status |
                  ("exit" space* ('(' space* ')')?  space* ) %exit |
                  ("q" space* ) %exit |
                  ( ( "//" any*) %comment)
@@ -160,7 +167,7 @@ static int parse_sitl2_cli_command(servo_usb_control_context_t *ctx, const char 
 
     if(cs==sitl2_command_line_error){
        printf(" error\n");
-       return -1;
+       return WMQE_PARSE_ERROR;
     }
 
     if(cs>=sitl2_command_line_first_final){
@@ -173,8 +180,8 @@ static int parse_sitl2_cli_command(servo_usb_control_context_t *ctx, const char 
     printf("unknown command\n");
 
 
-    return -2;
-};
+    return WMQE_PARSE_ERROR;
+}
 
 
 #ifdef TEST_RAGEL_PARSER
