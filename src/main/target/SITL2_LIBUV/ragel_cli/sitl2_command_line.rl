@@ -300,6 +300,8 @@ static int parse_sitl2_cli_command(sitl2_cli_context_t *ctx, const char *data, s
                  ("h" space* ) %help |
 
                  ("exit" space* ('(' space* ')')?  space* ) %exit |
+                 ("e" space* ) %exit |
+                 ("quit" space* ('(' space* ')')?  space* ) %exit |
                  ("q" space* ) %exit |
 
                  ( ( "//" any*) %comment)

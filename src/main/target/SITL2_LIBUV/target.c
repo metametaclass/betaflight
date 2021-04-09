@@ -486,7 +486,7 @@ int sitl2_cli_WATCH_STOP(sitl2_cli_context_t *ctx){
 int sitl2_cli_HELP(sitl2_cli_context_t *ctx){
     printf("command line usage:\n");
     printf(" h, help -> exit program\n");
-    printf(" e, exit -> exit program\n");
+    printf(" e, q, exit, quit -> exit program\n");
     printf(" st, status -> show betaflight status\n");
     printf(" w, watch[(all|*,time|t,motors|m,arm|a,...)] -> run watch timer. prints specified stats each 1 second\n");
     printf(" ws, watch_stop -> stop watch timer\n");
