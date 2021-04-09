@@ -23,6 +23,7 @@
 #include "uv.h"
 #include "stdint.h"
 #include "platform.h"
+#include "rx/rx.h"
 /*
 typedef struct {
     double timestamp;                   // in seconds
@@ -81,6 +82,9 @@ typedef struct sitl2_state_s {
     //nanoseconds in scheduler call
     uint64_t scheduler_nanoseconds;
 
+    //current rc channel values
+    uint16_t rc_channels[MAX_SUPPORTED_RC_CHANNEL_COUNT];
+
     //motor output
     uint16_t motor_speed[MAX_SUPPORTED_MOTORS];   // normal: [0.0, 1.0], 3D: [-1.0, 1.0]
 
@@ -118,3 +122,9 @@ int sitl2_start_simulated_time(sitl2_state_t *state);
 
 //stop working in simulated time
 int sitl2_stop_simulated_time(sitl2_state_t *state);
+
+//set rc channel value
+int sitl2_set_rc_channel(sitl2_state_t *state, int channel, uint16_t value);
+
+//send rc channels frame to betaflight
+int sitl2_send_rc_channels(sitl2_state_t *state);

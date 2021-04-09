@@ -59,6 +59,10 @@ void sitl2_status_print_attitude() {
     printf("attitude: %d, %d, %d ; roll:%.1f pitch:%.1f yaw:%.1f\n", attitude.raw[0], attitude.raw[1], attitude.raw[2], attitude.values.roll*0.1, attitude.values.pitch*0.1, attitude.values.yaw*0.1);
 }
 
+void sitl2_status_print_motors(sitl2_state_t *state) {
+    printf("motors: %d %d %d %d\n", state->motor_speed[0], state->motor_speed[1], state->motor_speed[2], state->motor_speed[3]);
+}
+
 void sitl2_status_print_arm_flags(){
     printf("Arming disable flags:");
     armingDisableFlags_e flags = getArmingDisableFlags();
@@ -130,6 +134,8 @@ int sitl2_cli_STATUS(sitl2_cli_context_t *ctx){
     sitl2_status_print_attitude();
 
     sitl2_status_print_arm_flags();
+
+    sitl2_status_print_motors(ctx->state);
     return 0;
 }
 
@@ -167,6 +173,9 @@ void on_watch_timer(uv_timer_t *t){
     }
     if(watch->arm_flags) {
         sitl2_status_print_arm_flags();
+    }
+    if(watch->motors) {
+        sitl2_status_print_motors(state);
     }
 }
 
@@ -242,6 +251,17 @@ int sitl2_cli_SIM_STOP(sitl2_cli_context_t *ctx){
 
     rc = sitl2_stop_simulated_time(ctx->state);
     WMQ_CHECK_ERROR_AND_RETURN_RESULT(rc, "sitl2_stop_simulated_time");
+
+    return 0;
+}
+
+//set RX command
+int sitl2_cli_RX(sitl2_cli_context_t *ctx){
+    int rc;
+
+    printf("set 3 channel");
+    rc = sitl2_set_rc_channel(ctx->state, 2, 1500);
+    WMQ_CHECK_ERROR_AND_RETURN_RESULT(rc, "sitl2_set_rc_channel");
 
     return 0;
 }

@@ -229,7 +229,16 @@ static int parse_sitl2_cli_command(sitl2_cli_context_t *ctx, const char *data, s
 #endif
         }
 
-        action help{ 
+        action rx {
+#ifdef TEST_RAGEL_PARSER
+            printf(" RX\n");
+#else
+            rc = sitl2_cli_RX(ctx);
+            WMQ_CHECK_ERROR_AND_RETURN_RESULT(rc, "sitl2_cli_RX");
+#endif
+        }
+
+        action help{
 #ifdef TEST_RAGEL_PARSER
             printf(" HELP\n");
 #else
@@ -331,6 +340,8 @@ static int parse_sitl2_cli_command(sitl2_cli_context_t *ctx, const char *data, s
                  ("sim" space*) %sim_start |
 
                  ("sim_stop" space*) %sim_stop |
+
+                 ("rx" space*) %rx |
 
                  ("help" space* ) %help |
                  ("h" space* ) %help |

@@ -10,6 +10,8 @@
 #include "fc/init.h"
 #include "fc/tasks.h"
 
+#include "rx/msp.h"
+
 
 sitl2_state_t simulator_state = { 0 };
 
@@ -58,6 +60,9 @@ void run_timer_cb(uv_timer_t *timer) {
     uv_loop_t *loop = timer->loop;
     sitl2_state_t *state = container_of(loop, sitl2_state_t, loop);
 
+    rc = sitl2_send_rc_channels(state);
+    WMQ_CHECK_ERROR_AND_RETURN_VOID(rc, "sitl2_send_rc_channels");
+
     if(state->is_simulated_time){
         state->sim_timer_calls++;
         uint64_t start = uv_hrtime();
@@ -79,6 +84,7 @@ void run_timer_cb(uv_timer_t *timer) {
 
         sitl2_set_random_imu();
     }
+
 }
 
 
@@ -114,6 +120,12 @@ int sitl2_init(sitl2_state_t *state) {
     WMQ_CHECK_ERROR_AND_RETURN_RESULT(rc, "init_stdin");
 
     state->start_hrtime = uv_hrtime();
+
+    state->rc_channels[0] = 1500;
+    state->rc_channels[1] = 1500;
+    state->rc_channels[2] = 1000;
+    state->rc_channels[3] = 1500;
+    //state->rc_channels[4] = 1000;
 
     return 0;
 }
@@ -182,6 +194,9 @@ void sitl2_reset_simulation_state(sitl2_state_t *state){
     state->sim_timer_calls = 0;
     state->sim_timer_ns = 0;
 
+    //reset? rxNextUpdateAtUs
+    //reset? failsafeState.validRxDataReceivedAt
+
     //reset task times
     for (taskId_e taskId = 0; taskId < TASK_COUNT; taskId++) {
         getTask(taskId)->lastDesiredAt = 0;
@@ -224,5 +239,27 @@ int sitl2_stop_simulated_time(sitl2_state_t *state){
     sitl2_reset_simulation_state(state);
 
     //TODO: swap betaflight realtime/simulated state?
+    return 0;
+}
+
+//send rc channels frame to betaflight
+int sitl2_send_rc_channels(sitl2_state_t *state){
+    rxMspFrameReceive(state->rc_channels, MAX_SUPPORTED_RC_CHANNEL_COUNT);
+
+    return 0;
+}
+
+//set rc channel value
+int sitl2_set_rc_channel(sitl2_state_t *state, int channel, uint16_t value){
+    if(channel<0 || channel > MAX_SUPPORTED_RC_CHANNEL_COUNT) {
+        return UV_EINVAL;
+    }
+    state->rc_channels[channel] = value;
+    /*uint16_t frame[MAX_SUPPORTED_RC_CHANNEL_COUNT];
+    for (int i = 0; i < channelCount; i++) {
+        frame[i] = sbufReadU16(src);
+    }
+    rxMspFrameReceive(frame, channelCount);*/
+    sitl2_send_rc_channels(state);
     return 0;
 }
