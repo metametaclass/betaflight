@@ -1,3 +1,5 @@
+#include "math.h"
+
 #include "sitl2_command_line.h"
 
 #include "scheduler/scheduler.h"
@@ -17,6 +19,7 @@ typedef struct {
     int watch_any;
     int watch_time;
     int watch_task_rate;
+    int watch_scheduler;
     int watch_arm_flags;
     int watch_motors;
 } sitl2_cli_context_t;
@@ -49,6 +52,50 @@ void sitl2_status_print_arm_flags(){
     printf("\n");
 }
 
+void sitl2_status_print_scheduler(){
+
+    int maxLoadSum = 0;
+    int averageLoadSum = 0;
+
+#ifndef MINIMAL_CLI
+    if (systemConfig()->task_statistics) {
+        printf("Task list             rate/hz  max/us  avg/us maxload avgload  total/ms\n");
+    } else {
+        printf("Task list\n");
+    }
+#endif
+    for (taskId_e taskId = 0; taskId < TASK_COUNT; taskId++) {
+        taskInfo_t taskInfo;
+        getTaskInfo(taskId, &taskInfo);
+        if (taskInfo.isEnabled) {
+            int taskFrequency = taskInfo.averageDeltaTimeUs == 0 ? 0 : lrintf(1e6f / taskInfo.averageDeltaTimeUs);
+            printf("%02d - (%15s) ", taskId, taskInfo.taskName);
+            const int maxLoad = taskInfo.maxExecutionTimeUs == 0 ? 0 :(taskInfo.maxExecutionTimeUs * taskFrequency + 5000) / 1000;
+            const int averageLoad = taskInfo.averageExecutionTimeUs == 0 ? 0 : (taskInfo.averageExecutionTimeUs * taskFrequency + 5000) / 1000;
+            if (taskId != TASK_SERIAL) {
+                maxLoadSum += maxLoad;
+                averageLoadSum += averageLoad;
+            }
+            if (systemConfig()->task_statistics) {
+                printf("%6d %7d %7d %4d.%1d%% %4d.%1d%% %9d\n",
+                        taskFrequency, taskInfo.maxExecutionTimeUs, taskInfo.averageExecutionTimeUs,
+                        maxLoad/10, maxLoad%10, averageLoad/10, averageLoad%10, taskInfo.totalExecutionTimeUs / 1000);
+            } else {
+                printf("%6d\n", taskFrequency);
+            }
+
+            schedulerResetTaskMaxExecutionTime(taskId);
+        }
+    }
+    if (systemConfig()->task_statistics) {
+        cfCheckFuncInfo_t checkFuncInfo;
+        getCheckFuncInfo(&checkFuncInfo);
+        printf("RX Check Function %19d %7d %25d\n", checkFuncInfo.maxExecutionTimeUs, checkFuncInfo.averageExecutionTimeUs, checkFuncInfo.totalExecutionTimeUs / 1000);
+        printf("Total (excluding SERIAL) %25d.%1d%% %4d.%1d%%\n", maxLoadSum/10, maxLoadSum%10, averageLoadSum/10, averageLoadSum%10);
+        schedulerResetCheckFunctionMaxExecutionTime();
+    }
+}
+
 int sitl2_cli_STATUS(sitl2_cli_context_t *ctx){
     UNUSED(ctx);
 
@@ -56,6 +103,8 @@ int sitl2_cli_STATUS(sitl2_cli_context_t *ctx){
 
     sitl2_status_print_task_rate();
 
+    sitl2_status_print_scheduler();
+    
     // Battery meter
     //printf("Voltage: %d * 0.01V (%dS battery - %s)\n", getBatteryVoltage(), getBatteryCellCount(), getBatteryStateString());
 
@@ -70,6 +119,7 @@ typedef struct status_watch_s {
     int task_rate;
     int arm_flags;
     int motors;
+    int scheduler;
 } status_watch_t;
 
 static status_watch_t status_watch = { 0 };
@@ -86,6 +136,9 @@ void on_watch_timer(uv_timer_t *t){
     }
     if(watch->task_rate) {
         sitl2_status_print_task_rate();
+    }
+    if(watch->scheduler) {
+        sitl2_status_print_scheduler();
     }
     if(watch->arm_flags) {
         sitl2_status_print_arm_flags();
@@ -116,6 +169,7 @@ int sitl2_cli_WATCH(sitl2_cli_context_t *ctx){
         status_watch.task_rate = ctx->watch_all || ctx->watch_task_rate;
         status_watch.motors = ctx->watch_all || ctx->watch_motors;
         status_watch.arm_flags = ctx->watch_all || ctx->watch_arm_flags;
+        status_watch.scheduler = ctx->watch_all || ctx->watch_scheduler;
     }
 
     rc = uv_timer_start(&status_watch.timer, on_watch_timer, 0, 1000);

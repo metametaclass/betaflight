@@ -30,8 +30,10 @@ static int parse_sitl2_cli_command(const char *data, size_t length, int *is_exit
 static int parse_sitl2_cli_command(sitl2_cli_context_t *ctx, const char *data, size_t length) 
 #endif
 {
-
+#ifndef TEST_RAGEL_PARSER
     int rc;
+#endif
+
     const char *p = data, *pe = data + length;
     const char *eof = pe;
     const char *start = data;
@@ -45,15 +47,15 @@ static int parse_sitl2_cli_command(sitl2_cli_context_t *ctx, const char *data, s
     int top;
     int stack[SITL2_CLI_STACK_SIZE];
 
-    const char *key = data;
-    size_t key_size = 0;
-    int quoted = 0;
+    //const char *key = data;
+    //size_t key_size = 0;
+    //int quoted = 0;
 
 //    int tmp;
 //    int sign = 1;
    
-    int params[SITL2_CLI_MAX_CALL_PARAMS] = {0};
-    int param_num = 0;
+    // int params[SITL2_CLI_MAX_CALL_PARAMS] = {0};
+    // int param_num = 0;
 
     int cs;
 
@@ -155,6 +157,16 @@ static int parse_sitl2_cli_command(sitl2_cli_context_t *ctx, const char *data, s
             printf(" watch_param_task_rate" );
 #else
             ctx->watch_task_rate = 1;
+            ctx->watch_any = 1;
+#endif
+            fret;
+        }
+
+        action watch_param_scheduler {
+#ifdef TEST_RAGEL_PARSER
+            printf(" watch_param_scheduler" );
+#else
+            ctx->watch_scheduler = 1;
             ctx->watch_any = 1;
 #endif
             fret;
@@ -263,6 +275,8 @@ static int parse_sitl2_cli_command(sitl2_cli_context_t *ctx, const char *data, s
             "m" => watch_param_motors;
             "rate" => watch_param_task_rate;
             "r" => watch_param_task_rate;
+            "scheduler" => watch_param_scheduler;
+            "s" => watch_param_scheduler;
             "arm" => watch_param_arm_flags;
             "a" => watch_param_arm_flags;
             #(any - ',' - ')' - '=' )+ => { fret; };
