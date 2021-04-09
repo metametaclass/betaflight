@@ -11,78 +11,170 @@
 
 #endif
 
-#define MAX_CALL_PARAMS 3
+#define SITL2_CLI_MAX_CALL_PARAMS 3
+#define SITL2_CLI_STACK_SIZE 16
 
 
-/* #line 18 "sitl2_command_line.inc" */
-static const char _sitl2_command_line_key_offsets[] = {
-	0, 0, 4, 5, 6, 7, 8, 12, 
-	13, 14, 15, 16, 20, 20, 24, 27, 
-	31, 34
+/* #line 19 "sitl2_command_line.inc" */
+static const unsigned char _sitl2_command_line_key_offsets[] = {
+	0, 0, 6, 7, 8, 9, 10, 14, 
+	15, 16, 17, 18, 19, 20, 24, 26, 
+	27, 28, 29, 30, 31, 32, 33, 33, 
+	37, 40, 44, 47, 51, 54, 58, 64, 
+	68, 71, 76, 79, 87, 90, 95, 99, 
+	103, 107, 111, 115, 119, 123, 127, 131, 
+	135, 139, 143
 };
 
 static const char _sitl2_command_line_trans_keys[] = {
-	47, 101, 113, 115, 47, 120, 105, 116, 
-	32, 41, 9, 13, 116, 116, 117, 115, 
-	32, 41, 9, 13, 32, 40, 9, 13, 
-	32, 9, 13, 32, 97, 9, 13, 32, 
-	9, 13, 32, 40, 9, 13, 0
+	47, 101, 104, 113, 115, 119, 47, 120, 
+	105, 116, 32, 41, 9, 13, 108, 112, 
+	116, 116, 117, 115, 32, 41, 9, 13, 
+	41, 44, 116, 99, 104, 115, 116, 111, 
+	112, 32, 40, 9, 13, 32, 9, 13, 
+	32, 101, 9, 13, 32, 9, 13, 32, 
+	97, 9, 13, 32, 9, 13, 32, 40, 
+	9, 13, 32, 40, 97, 115, 9, 13, 
+	32, 40, 9, 13, 32, 9, 13, 32, 
+	40, 95, 9, 13, 32, 9, 13, 41, 
+	42, 44, 61, 97, 109, 114, 116, 41, 
+	44, 61, 41, 44, 61, 108, 114, 41, 
+	44, 61, 108, 41, 44, 61, 109, 41, 
+	44, 61, 111, 41, 44, 61, 116, 41, 
+	44, 61, 111, 41, 44, 61, 114, 41, 
+	44, 61, 115, 41, 44, 61, 97, 41, 
+	44, 61, 116, 41, 44, 61, 101, 41, 
+	44, 61, 105, 41, 44, 61, 109, 41, 
+	44, 61, 101, 0
 };
 
 static const char _sitl2_command_line_single_lengths[] = {
-	0, 4, 1, 1, 1, 1, 2, 1, 
-	1, 1, 1, 2, 0, 2, 1, 2, 
-	1, 2
+	0, 6, 1, 1, 1, 1, 2, 1, 
+	1, 1, 1, 1, 1, 2, 2, 1, 
+	1, 1, 1, 1, 1, 1, 0, 2, 
+	1, 2, 1, 2, 1, 2, 4, 2, 
+	1, 3, 1, 8, 3, 5, 4, 4, 
+	4, 4, 4, 4, 4, 4, 4, 4, 
+	4, 4, 4
 };
 
 static const char _sitl2_command_line_range_lengths[] = {
 	0, 0, 0, 0, 0, 0, 1, 0, 
-	0, 0, 0, 1, 0, 1, 1, 1, 
-	1, 1
+	0, 0, 0, 0, 0, 1, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 1, 
+	1, 1, 1, 1, 1, 1, 1, 1, 
+	1, 1, 1, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0
 };
 
-static const char _sitl2_command_line_index_offsets[] = {
-	0, 0, 5, 7, 9, 11, 13, 17, 
-	19, 21, 23, 25, 29, 30, 34, 37, 
-	41, 44
+static const unsigned char _sitl2_command_line_index_offsets[] = {
+	0, 0, 7, 9, 11, 13, 15, 19, 
+	21, 23, 25, 27, 29, 31, 35, 38, 
+	40, 42, 44, 46, 48, 50, 52, 53, 
+	57, 60, 64, 67, 71, 74, 78, 84, 
+	88, 91, 96, 99, 108, 112, 118, 123, 
+	128, 133, 138, 143, 148, 153, 158, 163, 
+	168, 173, 178
 };
 
 static const char _sitl2_command_line_indicies[] = {
-	1, 2, 3, 4, 0, 5, 0, 6, 
-	0, 7, 0, 8, 0, 9, 3, 9, 
-	0, 10, 0, 11, 0, 12, 0, 13, 
-	0, 14, 15, 14, 0, 5, 8, 9, 
-	8, 0, 3, 3, 0, 15, 16, 15, 
-	0, 15, 15, 0, 13, 14, 13, 0, 
-	0
+	1, 2, 3, 4, 5, 6, 0, 7, 
+	0, 8, 0, 9, 0, 10, 0, 11, 
+	4, 11, 0, 12, 0, 13, 0, 14, 
+	0, 15, 0, 16, 0, 17, 0, 18, 
+	19, 18, 0, 20, 21, 0, 22, 0, 
+	23, 0, 24, 0, 25, 0, 26, 0, 
+	27, 0, 28, 0, 7, 10, 11, 10, 
+	0, 4, 4, 0, 13, 29, 13, 0, 
+	13, 13, 0, 19, 30, 19, 0, 19, 
+	19, 0, 17, 18, 17, 0, 31, 32, 
+	33, 28, 31, 0, 31, 32, 31, 0, 
+	20, 20, 0, 31, 32, 34, 31, 0, 
+	28, 28, 0, 37, 36, 37, 37, 38, 
+	39, 40, 41, 35, 42, 42, 42, 35, 
+	43, 43, 43, 44, 45, 35, 46, 46, 
+	46, 47, 35, 46, 46, 46, 48, 35, 
+	49, 49, 49, 50, 35, 46, 46, 46, 
+	51, 35, 46, 46, 46, 52, 35, 46, 
+	46, 46, 53, 35, 46, 46, 46, 54, 
+	35, 55, 55, 55, 56, 35, 46, 46, 
+	46, 57, 35, 46, 46, 46, 58, 35, 
+	59, 59, 59, 60, 35, 46, 46, 46, 
+	61, 35, 46, 46, 46, 62, 35, 0
 };
 
 static const char _sitl2_command_line_trans_targs[] = {
-	0, 2, 3, 14, 7, 12, 4, 5, 
-	13, 6, 15, 9, 10, 17, 11, 16, 
-	8
+	0, 2, 3, 25, 24, 9, 30, 22, 
+	4, 5, 23, 6, 8, 26, 27, 11, 
+	12, 29, 13, 28, 32, 14, 16, 17, 
+	33, 19, 20, 21, 34, 7, 10, 31, 
+	14, 15, 18, 36, 36, 0, 37, 40, 
+	45, 48, 35, 35, 38, 39, 35, 36, 
+	36, 35, 41, 42, 43, 44, 36, 35, 
+	46, 47, 36, 35, 49, 50, 36
 };
 
 static const char _sitl2_command_line_trans_actions[] = {
-	2, 0, 0, 0, 0, 0, 0, 0, 
+	3, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
-	0
+	0, 0, 0, 0, 0, 4, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	10, 0, 0, 13, 14, 0, 0, 0, 
+	0, 0, 15, 16, 0, 0, 17, 18, 
+	19, 20, 0, 0, 0, 0, 21, 22, 
+	0, 0, 23, 24, 0, 0, 25
+};
+
+static const char _sitl2_command_line_to_state_actions[] = {
+	0, 1, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 1, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 1, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0
+};
+
+static const char _sitl2_command_line_from_state_actions[] = {
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 12, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0
 };
 
 static const char _sitl2_command_line_eof_actions[] = {
-	0, 1, 1, 1, 1, 1, 1, 1, 
-	1, 1, 1, 1, 3, 4, 4, 5, 
-	5, 5
+	0, 2, 2, 2, 2, 2, 2, 2, 
+	2, 2, 2, 2, 2, 2, 2, 2, 
+	2, 2, 2, 2, 2, 2, 5, 6, 
+	6, 7, 7, 8, 8, 8, 9, 9, 
+	9, 9, 11, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0
+};
+
+static const unsigned char _sitl2_command_line_eof_trans[] = {
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 43, 44, 47, 47, 
+	50, 47, 47, 47, 47, 56, 47, 47, 
+	60, 47, 47
 };
 
 static const int sitl2_command_line_start = 1;
-static const int sitl2_command_line_first_final = 12;
+static const int sitl2_command_line_first_final = 22;
 static const int sitl2_command_line_error = 0;
 
+static const int sitl2_command_line_en_watch_param_scanner = 35;
 static const int sitl2_command_line_en_main = 1;
 
 
-/* #line 17 "sitl2_command_line.rl" */
+/* #line 18 "sitl2_command_line.rl" */
 
 
 #ifdef TEST_RAGEL_PARSER
@@ -104,21 +196,38 @@ static int parse_sitl2_cli_command(sitl2_cli_context_t *ctx, const char *data, s
     const char *eof = pe;
     const char *start = data;
 
+    //for scanners
+    const char *ts;
+    const char *te;
+    int act;
+
+    //for stack
+    int top;
+    int stack[SITL2_CLI_STACK_SIZE];
+
+    const char *key = data;
+    size_t key_size = 0;
+    int quoted = 0;
+
 //    int tmp;
 //    int sign = 1;
    
-    int params[MAX_CALL_PARAMS] = {0};
+    int params[SITL2_CLI_MAX_CALL_PARAMS] = {0};
     int param_num = 0;
 
     int cs;
 
     
-/* #line 117 "sitl2_command_line.inc" */
+/* #line 222 "sitl2_command_line.inc" */
 	{
 	cs = sitl2_command_line_start;
+	top = 0;
+	ts = 0;
+	te = 0;
+	act = 0;
 	}
 
-/* #line 122 "sitl2_command_line.inc" */
+/* #line 231 "sitl2_command_line.inc" */
 	{
 	int _klen;
 	const char *_keys;
@@ -129,6 +238,14 @@ static int parse_sitl2_cli_command(sitl2_cli_context_t *ctx, const char *data, s
 	if ( cs == 0 )
 		goto _out;
 _resume:
+	switch ( _sitl2_command_line_from_state_actions[cs] ) {
+	case 12:
+/* #line 1 "NONE" */
+	{ts = p;}
+	break;
+/* #line 247 "sitl2_command_line.inc" */
+	}
+
 	_keys = _sitl2_command_line_trans_keys + _sitl2_command_line_key_offsets[cs];
 	_trans = _sitl2_command_line_index_offsets[cs];
 
@@ -179,14 +296,15 @@ _resume:
 
 _match:
 	_trans = _sitl2_command_line_indicies[_trans];
+_eof_trans:
 	cs = _sitl2_command_line_trans_targs[_trans];
 
 	if ( _sitl2_command_line_trans_actions[_trans] == 0 )
 		goto _again;
 
 	switch ( _sitl2_command_line_trans_actions[_trans] ) {
-	case 2:
-/* #line 89 "sitl2_command_line.rl" */
+	case 3:
+/* #line 232 "sitl2_command_line.rl" */
 	{ 
 #ifdef TEST_RAGEL_PARSER
             printf(" error at %d \"%s\"\n", (int)(p-start), p); 
@@ -194,10 +312,211 @@ _match:
             return WMQE_INVALID_CLI_COMMAND;
         }
 	break;
-/* #line 198 "sitl2_command_line.inc" */
+	case 10:
+/* #line 276 "sitl2_command_line.rl" */
+	{ {stack[top++] = cs; cs = 35;goto _again;} }
+	break;
+	case 4:
+/* #line 276 "sitl2_command_line.rl" */
+	{ {stack[top++] = cs; cs = 35;goto _again;} }
+	break;
+	case 24:
+/* #line 133 "sitl2_command_line.rl" */
+	{te = p;p--;{
+#ifdef TEST_RAGEL_PARSER
+            printf(" watch_param_time" );
+#else
+            ctx->watch_time = 1;
+            ctx->watch_any = 1;
+#endif
+            {cs = stack[--top]; goto _again;}
+        }}
+	break;
+	case 20:
+/* #line 143 "sitl2_command_line.rl" */
+	{te = p;p--;{
+#ifdef TEST_RAGEL_PARSER
+            printf(" watch_param_motors" );
+#else
+            ctx->watch_motors = 1;
+            ctx->watch_any = 1;
+#endif
+            {cs = stack[--top]; goto _again;}
+        }}
+	break;
+	case 22:
+/* #line 153 "sitl2_command_line.rl" */
+	{te = p;p--;{
+#ifdef TEST_RAGEL_PARSER
+            printf(" watch_param_task_rate" );
+#else
+            ctx->watch_task_rate = 1;
+            ctx->watch_any = 1;
+#endif
+            {cs = stack[--top]; goto _again;}
+        }}
+	break;
+	case 16:
+/* #line 163 "sitl2_command_line.rl" */
+	{te = p;p--;{
+#ifdef TEST_RAGEL_PARSER
+            printf(" watch_param_arm_flags" );
+#else
+            ctx->watch_arm_flags = 1;
+            ctx->watch_any = 1;
+#endif
+            {cs = stack[--top]; goto _again;}
+        }}
+	break;
+	case 17:
+/* #line 173 "sitl2_command_line.rl" */
+	{te = p;p--;{
+#ifdef TEST_RAGEL_PARSER
+            printf(" watch_param ERROR\n" ); 
+#else
+            //rc = WMQE_INVALID_CLI_COMMAND;
+#endif
+            return WMQE_PARSE_ERROR;
+            {cs = stack[--top]; goto _again;}
+        }}
+	break;
+	case 15:
+/* #line 1 "NONE" */
+	{	switch( act ) {
+	case 1:
+	{{p = ((te))-1;}
+#ifdef TEST_RAGEL_PARSER
+            printf(" watch_param_all" );
+#else
+            ctx->watch_all = 1;
+            ctx->watch_any = 1;
+#endif
+            {cs = stack[--top]; goto _again;}
+        }
+	break;
+	case 2:
+	{{p = ((te))-1;}
+#ifdef TEST_RAGEL_PARSER
+            printf(" watch_param_all" );
+#else
+            ctx->watch_all = 1;
+            ctx->watch_any = 1;
+#endif
+            {cs = stack[--top]; goto _again;}
+        }
+	break;
+	case 3:
+	{{p = ((te))-1;}
+#ifdef TEST_RAGEL_PARSER
+            printf(" watch_param_time" );
+#else
+            ctx->watch_time = 1;
+            ctx->watch_any = 1;
+#endif
+            {cs = stack[--top]; goto _again;}
+        }
+	break;
+	case 5:
+	{{p = ((te))-1;}
+#ifdef TEST_RAGEL_PARSER
+            printf(" watch_param_motors" );
+#else
+            ctx->watch_motors = 1;
+            ctx->watch_any = 1;
+#endif
+            {cs = stack[--top]; goto _again;}
+        }
+	break;
+	case 7:
+	{{p = ((te))-1;}
+#ifdef TEST_RAGEL_PARSER
+            printf(" watch_param_task_rate" );
+#else
+            ctx->watch_task_rate = 1;
+            ctx->watch_any = 1;
+#endif
+            {cs = stack[--top]; goto _again;}
+        }
+	break;
+	case 9:
+	{{p = ((te))-1;}
+#ifdef TEST_RAGEL_PARSER
+            printf(" watch_param_arm_flags" );
+#else
+            ctx->watch_arm_flags = 1;
+            ctx->watch_any = 1;
+#endif
+            {cs = stack[--top]; goto _again;}
+        }
+	break;
+	case 11:
+	{{p = ((te))-1;}
+#ifdef TEST_RAGEL_PARSER
+            printf(" watch_param ERROR\n" ); 
+#else
+            //rc = WMQE_INVALID_CLI_COMMAND;
+#endif
+            return WMQE_PARSE_ERROR;
+            {cs = stack[--top]; goto _again;}
+        }
+	break;
+	}
+	}
+	break;
+	case 18:
+/* #line 1 "NONE" */
+	{te = p+1;}
+/* #line 123 "sitl2_command_line.rl" */
+	{act = 1;}
+	break;
+	case 14:
+/* #line 1 "NONE" */
+	{te = p+1;}
+/* #line 123 "sitl2_command_line.rl" */
+	{act = 2;}
+	break;
+	case 25:
+/* #line 1 "NONE" */
+	{te = p+1;}
+/* #line 133 "sitl2_command_line.rl" */
+	{act = 3;}
+	break;
+	case 21:
+/* #line 1 "NONE" */
+	{te = p+1;}
+/* #line 143 "sitl2_command_line.rl" */
+	{act = 5;}
+	break;
+	case 23:
+/* #line 1 "NONE" */
+	{te = p+1;}
+/* #line 153 "sitl2_command_line.rl" */
+	{act = 7;}
+	break;
+	case 19:
+/* #line 1 "NONE" */
+	{te = p+1;}
+/* #line 163 "sitl2_command_line.rl" */
+	{act = 9;}
+	break;
+	case 13:
+/* #line 1 "NONE" */
+	{te = p+1;}
+/* #line 173 "sitl2_command_line.rl" */
+	{act = 11;}
+	break;
+/* #line 509 "sitl2_command_line.inc" */
 	}
 
 _again:
+	switch ( _sitl2_command_line_to_state_actions[cs] ) {
+	case 1:
+/* #line 1 "NONE" */
+	{ts = 0;}
+	break;
+/* #line 518 "sitl2_command_line.inc" */
+	}
+
 	if ( cs == 0 )
 		goto _out;
 	if ( ++p != pe )
@@ -205,24 +524,13 @@ _again:
 	_test_eof: {}
 	if ( p == eof )
 	{
+	if ( _sitl2_command_line_eof_trans[cs] > 0 ) {
+		_trans = _sitl2_command_line_eof_trans[cs] - 1;
+		goto _eof_trans;
+	}
 	switch ( _sitl2_command_line_eof_actions[cs] ) {
-	case 1:
-/* #line 89 "sitl2_command_line.rl" */
-	{ 
-#ifdef TEST_RAGEL_PARSER
-            printf(" error at %d \"%s\"\n", (int)(p-start), p); 
-#endif
-            return WMQE_INVALID_CLI_COMMAND;
-        }
-/* #line 96 "sitl2_command_line.rl" */
-	{ 
-#ifdef TEST_RAGEL_PARSER
-            printf(" eof at %d\n", (int)(p-start));
-#endif
-        }
-	break;
-	case 5:
-/* #line 103 "sitl2_command_line.rl" */
+	case 8:
+/* #line 104 "sitl2_command_line.rl" */
 	{ 
 #ifdef TEST_RAGEL_PARSER
             printf(" STATUS\n");
@@ -231,15 +539,66 @@ _again:
             WMQ_CHECK_ERROR_AND_RETURN_RESULT(rc, "sitl2_cli_STATUS");
 #endif
         }
-/* #line 96 "sitl2_command_line.rl" */
+/* #line 239 "sitl2_command_line.rl" */
 	{ 
 #ifdef TEST_RAGEL_PARSER
             printf(" eof at %d\n", (int)(p-start));
 #endif
         }
 	break;
-	case 4:
-/* #line 112 "sitl2_command_line.rl" */
+	case 9:
+/* #line 184 "sitl2_command_line.rl" */
+	{ 
+#ifdef TEST_RAGEL_PARSER
+            printf(" WATCH\n");
+#else
+            rc = sitl2_cli_WATCH(ctx);
+            WMQ_CHECK_ERROR_AND_RETURN_RESULT(rc, "sitl2_cli_WATCH");
+#endif
+        }
+/* #line 239 "sitl2_command_line.rl" */
+	{ 
+#ifdef TEST_RAGEL_PARSER
+            printf(" eof at %d\n", (int)(p-start));
+#endif
+        }
+	break;
+	case 11:
+/* #line 193 "sitl2_command_line.rl" */
+	{ 
+#ifdef TEST_RAGEL_PARSER
+            printf(" WATCH_STOP\n");
+#else
+            rc = sitl2_cli_WATCH_STOP(ctx);
+            WMQ_CHECK_ERROR_AND_RETURN_RESULT(rc, "sitl2_cli_WATCH_STOP");
+#endif
+        }
+/* #line 239 "sitl2_command_line.rl" */
+	{ 
+#ifdef TEST_RAGEL_PARSER
+            printf(" eof at %d\n", (int)(p-start));
+#endif
+        }
+	break;
+	case 7:
+/* #line 203 "sitl2_command_line.rl" */
+	{ 
+#ifdef TEST_RAGEL_PARSER
+            printf(" HELP\n");
+#else
+            rc = sitl2_cli_HELP(ctx);
+            WMQ_CHECK_ERROR_AND_RETURN_RESULT(rc, "sitl2_cli_HELP");
+#endif
+        }
+/* #line 239 "sitl2_command_line.rl" */
+	{ 
+#ifdef TEST_RAGEL_PARSER
+            printf(" eof at %d\n", (int)(p-start));
+#endif
+        }
+	break;
+	case 6:
+/* #line 213 "sitl2_command_line.rl" */
 	{ 
 #ifdef TEST_RAGEL_PARSER
             printf(" EXIT\n");
@@ -249,36 +608,51 @@ _again:
             WMQ_CHECK_ERROR_AND_RETURN_RESULT(rc, "sitl2_cli_EXIT");
 #endif
         }
-/* #line 96 "sitl2_command_line.rl" */
+/* #line 239 "sitl2_command_line.rl" */
 	{ 
 #ifdef TEST_RAGEL_PARSER
             printf(" eof at %d\n", (int)(p-start));
 #endif
         }
 	break;
-	case 3:
-/* #line 123 "sitl2_command_line.rl" */
+	case 5:
+/* #line 224 "sitl2_command_line.rl" */
 	{ 
 #ifdef TEST_RAGEL_PARSER
             printf(" COMMENT\n");
 #else
 #endif
         }
-/* #line 96 "sitl2_command_line.rl" */
+/* #line 239 "sitl2_command_line.rl" */
 	{ 
 #ifdef TEST_RAGEL_PARSER
             printf(" eof at %d\n", (int)(p-start));
 #endif
         }
 	break;
-/* #line 275 "sitl2_command_line.inc" */
+	case 2:
+/* #line 232 "sitl2_command_line.rl" */
+	{ 
+#ifdef TEST_RAGEL_PARSER
+            printf(" error at %d \"%s\"\n", (int)(p-start), p); 
+#endif
+            return WMQE_INVALID_CLI_COMMAND;
+        }
+/* #line 239 "sitl2_command_line.rl" */
+	{ 
+#ifdef TEST_RAGEL_PARSER
+            printf(" eof at %d\n", (int)(p-start));
+#endif
+        }
+	break;
+/* #line 649 "sitl2_command_line.inc" */
 	}
 	}
 
 	_out: {}
 	}
 
-/* #line 162 "sitl2_command_line.rl" */
+/* #line 311 "sitl2_command_line.rl" */
 
 
 #ifdef TEST_RAGEL_PARSER

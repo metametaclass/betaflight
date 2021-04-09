@@ -359,12 +359,19 @@ uint16_t adcGetChannel(uint8_t channel) {
 
 typedef struct {
     int is_exit;
+    int watch_all;
+    int watch_any;
+    int watch_time;
+    int watch_task_rate;
+    int watch_arm_flags;
+    int watch_motors;
 } sitl2_cli_context_t;
 
-int sitl2_cli_STATUS(sitl2_cli_context_t *ctx){
-    printf("System Uptime: %d seconds\n", millis() / 1000);
+void sitl2_status_print_time(){
+    printf("System Uptime: %lu microseconds, %d seconds\n", micros(),  millis() / 1000);
+}
 
-
+void sitl2_status_print_task_rate(){
     const int gyroRate = getTaskDeltaTimeUs(TASK_GYRO) == 0 ? 0 : (int)(1000000.0f / ((float)getTaskDeltaTimeUs(TASK_GYRO)));
     int rxRate = getCurrentRxRefreshRate();
     if (rxRate != 0) {
@@ -373,10 +380,9 @@ int sitl2_cli_STATUS(sitl2_cli_context_t *ctx){
     const int systemRate = getTaskDeltaTimeUs(TASK_SYSTEM) == 0 ? 0 : (int)(1000000.0f / ((float)getTaskDeltaTimeUs(TASK_SYSTEM)));
     printf("CPU:%d%%, cycle time: %d, GYRO rate: %d, RX rate: %d, System rate: %d\n",
             constrain(getAverageSystemLoadPercent(), 0, 100), getTaskDeltaTimeUs(TASK_GYRO), gyroRate, rxRate, systemRate);
+}
 
-    // Battery meter
-    //printf("Voltage: %d * 0.01V (%dS battery - %s)\n", getBatteryVoltage(), getBatteryCellCount(), getBatteryStateString());
-
+void sitl2_status_print_arm_flags(){
     printf("Arming disable flags:");
     armingDisableFlags_e flags = getArmingDisableFlags();
     while (flags) {
@@ -385,6 +391,105 @@ int sitl2_cli_STATUS(sitl2_cli_context_t *ctx){
         printf(" %s", armingDisableFlagNames[bitpos]);
     }
     printf("\n");
+}
+
+int sitl2_cli_STATUS(sitl2_cli_context_t *ctx){
+    sitl2_status_print_time();
+
+    sitl2_status_print_task_rate();
+    
+
+    // Battery meter
+    //printf("Voltage: %d * 0.01V (%dS battery - %s)\n", getBatteryVoltage(), getBatteryCellCount(), getBatteryStateString());
+
+    sitl2_status_print_arm_flags();
+    return 0;
+}
+
+typedef struct status_watch_s {
+    uv_timer_t timer;
+    int active;
+    int time;
+    int task_rate;
+    int arm_flags;
+    int motors;
+} status_watch_t;
+
+static status_watch_t status_watch = { 0 };
+
+
+void on_watch_timer(uv_timer_t *t){
+    status_watch_t *watch = container_of(t, status_watch_t, timer);
+    UNUSED(t);
+    if(watch->time) {
+        sitl2_status_print_time();
+    }
+    if(watch->task_rate) {
+        sitl2_status_print_task_rate();
+    }
+    if(watch->arm_flags) {
+        sitl2_status_print_arm_flags();
+    }
+    //sitl2_cli_STATUS()
+}
+
+int sitl2_cli_WATCH(sitl2_cli_context_t *ctx){
+    int rc;
+
+    if(status_watch.active) {
+        //printf("watch timer already active\n");
+        WMQ_LOG_WARN("watch timer already active");
+        return WMQE_INVALIDOP;
+    }
+    printf("starting watch timer\n");
+    memset(&status_watch, 0, sizeof(status_watch));
+    
+    rc = uv_timer_init(&libuv_loop, &status_watch.timer);
+    WMQ_CHECK_ERROR_AND_RETURN_RESULT(rc, "uv_timer_init");
+
+    if (!ctx->watch_any) {
+        //default
+        status_watch.time = 1;
+    } else {
+
+        status_watch.time = ctx->watch_all || ctx->watch_time;
+        status_watch.task_rate = ctx->watch_all || ctx->watch_task_rate;
+        status_watch.motors = ctx->watch_all || ctx->watch_motors;
+        status_watch.arm_flags = ctx->watch_all || ctx->watch_arm_flags;
+    }
+    
+
+    
+
+    rc = uv_timer_start(&status_watch.timer, on_watch_timer, 0, 1000);
+    WMQ_CHECK_ERROR_AND_RETURN_RESULT(rc, "uv_timer_start");
+    status_watch.active = 1;
+
+    return 0;
+}
+
+int sitl2_cli_WATCH_STOP(sitl2_cli_context_t *ctx){
+    int rc;
+
+    if(!status_watch.active){
+        WMQ_LOG_WARN("watch timer inactive");
+        return WMQE_INVALIDOP;
+    }
+    printf("stopping watch timer\n");
+    rc = uv_timer_stop(&status_watch.timer);
+    WMQ_CHECK_ERROR_AND_RETURN_RESULT(rc, "uv_timer_stop");
+    status_watch.active = 0;
+
+    return 0;
+}
+
+int sitl2_cli_HELP(sitl2_cli_context_t *ctx){
+    printf("command line usage:\n");
+    printf(" h, help -> exit program\n");
+    printf(" e, exit -> exit program\n");
+    printf(" st, status -> show betaflight status\n");
+    printf(" w, watch[(all|*,time|t,motors|m,arm|a,...)] -> run watch timer. prints specified stats each 1 second\n");
+    printf(" ws, watch_stop -> stop watch timer\n");
     return 0;
 }
 
