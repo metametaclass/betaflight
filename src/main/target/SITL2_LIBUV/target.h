@@ -237,36 +237,10 @@ typedef enum
   FLASH_TIMEOUT
 } FLASH_Status;
 
-typedef struct {
-    double timestamp;                   // in seconds
-    double imu_angular_velocity_rpy[3]; // rad/s -> range: +/- 8192; +/- 2000 deg/se
-    double imu_linear_acceleration_xyz[3];    // m/s/s NED, body frame -> sim 1G = 9.80665, FC 1G = 256
-    double imu_orientation_quat[4];     //w, x, y, z
-    double velocity_xyz[3];             // m/s, earth frame
-    double position_xyz[3];             // meters, NED from origin
-} fdm_packet;
-typedef struct {
-    float motor_speed[4];   // normal: [0.0, 1.0], 3D: [-1.0, 1.0]
-} servo_packet;
 
 void FLASH_Unlock(void);
 void FLASH_Lock(void);
 FLASH_Status FLASH_ErasePage(uintptr_t Page_Address);
 FLASH_Status FLASH_ProgramWord(uintptr_t addr, uint32_t Data);
 
-/*
-uint64_t nanos64_real(void);
-uint64_t micros64_real(void);
-uint64_t millis64_real(void);
-void delayMicroseconds_real(uint32_t us);
-uint64_t micros64(void);
-uint64_t millis64(void);
-*/
-
-//global libuv event loop
-extern uv_loop_t libuv_loop;
-
-
-int sitl2_parse_command_line(char *data, size_t size);
-
-void scheduler_with_stats();
+//int sitl2_parse_command_line(char *data, size_t size);

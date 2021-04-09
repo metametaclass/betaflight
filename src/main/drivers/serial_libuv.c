@@ -37,7 +37,7 @@
 #include "serial_libuv.h"
 #include "uv.h"
 #include "wmq_error.h"
-
+#include "sitl2_state.h"
 
 #define BASE_PORT 5760
 
@@ -169,7 +169,7 @@ static libuvSerialPort_t* libuvSerialInit(libuvSerialPort_t *s, int id)
     s->clientCount = 0;
     s->id = id;
 
-    rc = uv_tcp_init(&libuv_loop, &s->server);
+    rc = uv_tcp_init(&simulator_state.loop, &s->server);
     WMQ_CHECK_ERROR(rc, "uv_tcp_init");
     if(rc){
         return NULL;
