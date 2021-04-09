@@ -10,7 +10,7 @@
 #define STD_ACCEL_G 9.80665
 #define RAD2DEG (180.0 / M_PI)
 #define ACC_SCALE (256 / STD_ACCEL_G)
-#define GYRO_SCALE (16384 / 2000.0f)
+#define GYRO_SCALE (16384 / 2000.0)
 
 //GYRO_SCALE_2000DPS (2000.0f / (1 << 15))   // 16.384 dps/lsb scalefactor for 2000dps sensors
 
