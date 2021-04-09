@@ -56,9 +56,19 @@ void run_timer_cb(uv_timer_t *timer) {
     uv_loop_t *loop = timer->loop;
     sitl2_state_t *state = container_of(loop, sitl2_state_t, loop);
 
-    //TODO: shift emulation time?
-    sitl2_scheduler_with_stats(state);
-    processLoopback();
+    if(state->is_simulated_time){
+        state->sim_timer_calls++;
+        uint64_t start = uv_hrtime();
+        for(uint32_t i=0; i<state->steps_count; i++) {
+            state->sim_time_ns += state->sim_time_step_ns;
+            sitl2_scheduler_with_stats(state);
+        }
+        uint64_t end = uv_hrtime();
+        state->sim_timer_ns += (end-start);
+    }else{
+        sitl2_scheduler_with_stats(state);
+        processLoopback();
+    }
 }
 
 
@@ -93,6 +103,8 @@ int sitl2_init(sitl2_state_t *state) {
     rc = init_stdin(&state->loop, &state->tty);
     WMQ_CHECK_ERROR_AND_RETURN_RESULT(rc, "init_stdin");
 
+    state->start_hrtime = uv_hrtime();
+
     return 0;
 }
 
@@ -122,22 +134,24 @@ void sitl2_close_event_loop(sitl2_state_t *state){
     close_all_handles(&state->loop);
 }
 
-//current time in microseconds
-int64_t sitl2_micros64(sitl2_state_t *state){
+
+//current time in nanoseconds
+uint64_t sitl2_current_time_ns(sitl2_state_t *state){
     if(state->is_simulated_time){
-        return state->sim_time_ns / 1000;
+        return state->sim_time_ns;
+    }else{
+        return uv_hrtime() - state->start_hrtime;
     }
-    uint64_t hrtime = uv_hrtime();
-    return (hrtime - state->start_hrtime)/1000;
+}
+
+//current time in microseconds
+int64_t sitl2_current_time_us(sitl2_state_t *state){
+    return sitl2_current_time_ns(state) / 1000;
 }
 
 //current time in milliseconds
-int64_t sitl2_millis64(sitl2_state_t *state){
-    if(state->is_simulated_time){
-        return state->sim_time_ns / 1000000;
-    }
-    uint64_t hrtime = uv_hrtime();
-    return (hrtime - state->start_hrtime)/1000000;
+int64_t sitl2_current_time_ms(sitl2_state_t *state){
+    return sitl2_current_time_ns(state) / 1000000;
 }
 
 
@@ -150,3 +164,40 @@ void sitl2_scheduler_with_stats(sitl2_state_t *state){
     state->scheduler_calls++;
 }
 
+
+//start working in simulated time
+int sitl2_start_simulated_time(sitl2_state_t *state){
+    if(state->is_simulated_time){
+        WMQ_LOG_WARN("already in simulated time");
+        return WMQE_INVALIDOP;
+    }
+
+    state->is_simulated_time = 1;
+    state->sim_time_ns = 0;
+    state->time_prev_ns = 0;
+    state->sim_time_step_ns = 1000;//1 us
+    state->steps_count = 2000;
+    state->scheduler_calls = 0;
+    state->scheduler_nanoseconds = 0;
+
+    //TODO: swap betaflight realtime/simulated state?
+    return 0;
+}
+
+//stop working in simulated time
+int sitl2_stop_simulated_time(sitl2_state_t *state){
+    if(!state->is_simulated_time){
+        WMQ_LOG_WARN("already in simulated time");
+        return WMQE_INVALIDOP;
+    }
+    state->is_simulated_time = 0;
+
+    //reset start time
+    state->start_hrtime = uv_hrtime();
+    state->time_prev_ns = 0;
+    state->scheduler_calls = 0;
+    state->scheduler_nanoseconds = 0;
+
+    //TODO: swap betaflight realtime/simulated state?
+    return 0;
+}

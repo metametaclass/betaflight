@@ -211,6 +211,23 @@ static int parse_sitl2_cli_command(sitl2_cli_context_t *ctx, const char *data, s
 #endif
         }
 
+        action sim_start {
+#ifdef TEST_RAGEL_PARSER
+            printf(" SIM_START\n");
+#else
+            rc = sitl2_cli_SIM_START(ctx);
+            WMQ_CHECK_ERROR_AND_RETURN_RESULT(rc, "sitl2_cli_SIM_START");
+#endif
+        }
+
+        action sim_stop {
+#ifdef TEST_RAGEL_PARSER
+            printf(" SIM_STOP\n");
+#else
+            rc = sitl2_cli_SIM_STOP(ctx);
+            WMQ_CHECK_ERROR_AND_RETURN_RESULT(rc, "sitl2_cli_SIM_STOP");
+#endif
+        }
 
         action help{ 
 #ifdef TEST_RAGEL_PARSER
@@ -309,6 +326,11 @@ static int parse_sitl2_cli_command(sitl2_cli_context_t *ctx, const char *data, s
 
                  ("watch_stop" space*) %watch_stop |
                  ("ws" space*) %watch_stop |
+
+                 ("sim_start" space*) %sim_start |
+                 ("sim" space*) %sim_start |
+
+                 ("sim_stop" space*) %sim_stop |
 
                  ("help" space* ) %help |
                  ("h" space* ) %help |

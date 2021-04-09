@@ -81,8 +81,6 @@ void systemInit(void) {
 
     SystemCoreClock = 500 * 1e6; // fake 500MHz
 
-    simulator_state.start_hrtime = uv_hrtime();
-
     // serial can't been slow down
     rescheduleTask(TASK_SERIAL, 1);
 }
@@ -141,7 +139,7 @@ void delayMicroseconds(timeUs_t us)
 // }
 
 uint32_t micros(void) {
-    return sitl2_micros64(&simulator_state) & 0xFFFFFFFF;
+    return sitl2_current_time_us(&simulator_state) & 0xFFFFFFFF;
 }
 
 // uint64_t millis64(void) {
@@ -149,7 +147,7 @@ uint32_t micros(void) {
 // }
 
 uint32_t millis(void) {
-    return sitl2_millis64(&simulator_state) & 0xFFFFFFFF;
+    return sitl2_current_time_ms(&simulator_state) & 0xFFFFFFFF;
 }
 
 

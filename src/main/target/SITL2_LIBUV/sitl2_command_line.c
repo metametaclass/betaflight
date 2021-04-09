@@ -27,7 +27,18 @@ typedef struct {
 
 
 void sitl2_status_print_time(sitl2_state_t *state){
-    printf("System Uptime: %lu microseconds, %lu seconds, %lu scheduler calls, %.3f seconds in scheduler\n", sitl2_micros64(state),  sitl2_millis64(state) / 1000, state->scheduler_calls, state->scheduler_nanoseconds * 1e-9);
+    if(state->is_simulated_time){
+        printf("simulation");
+    }else{
+        printf("realtime");
+    }
+    uint64_t current_time_ns = sitl2_current_time_ns(state);
+    printf(": step: %.3f sec", (current_time_ns - state->time_prev_ns)*1e-9);
+    printf(": %lu microseconds, %.3f seconds, %lu scheduler calls, %.3f seconds in scheduler\n", sitl2_current_time_us(state),  sitl2_current_time_ms(state) * 1e-3, state->scheduler_calls, state->scheduler_nanoseconds * 1e-9);
+    if(state->is_simulated_time){
+        printf("%lu timer calls, %.3f seconds in timer call\n", state->sim_timer_calls, state->sim_timer_ns * 1e-9);
+    }
+    state->time_prev_ns = current_time_ns;
 }
 
 void sitl2_status_print_task_rate(){
@@ -96,6 +107,7 @@ void sitl2_status_print_scheduler(){
     }
 }
 
+//print current simulator status
 int sitl2_cli_STATUS(sitl2_cli_context_t *ctx){
     UNUSED(ctx);
 
@@ -145,6 +157,7 @@ void on_watch_timer(uv_timer_t *t){
     }
 }
 
+//start status print timer
 int sitl2_cli_WATCH(sitl2_cli_context_t *ctx){
     int rc;
     uv_loop_t *loop = &ctx->state->loop;
@@ -172,6 +185,8 @@ int sitl2_cli_WATCH(sitl2_cli_context_t *ctx){
         status_watch.scheduler = ctx->watch_all || ctx->watch_scheduler;
     }
 
+    ctx->state->time_prev_ns = sitl2_current_time_ns(ctx->state);
+
     rc = uv_timer_start(&status_watch.timer, on_watch_timer, 0, 1000);
     WMQ_CHECK_ERROR_AND_RETURN_RESULT(rc, "uv_timer_start");
     status_watch.active = 1;
@@ -179,6 +194,7 @@ int sitl2_cli_WATCH(sitl2_cli_context_t *ctx){
     return 0;
 }
 
+//stop status print timer
 int sitl2_cli_WATCH_STOP(sitl2_cli_context_t *ctx){
     UNUSED(ctx);
     int rc;
@@ -192,6 +208,26 @@ int sitl2_cli_WATCH_STOP(sitl2_cli_context_t *ctx){
     rc = uv_timer_stop(&status_watch.timer);
     WMQ_CHECK_ERROR_AND_RETURN_RESULT(rc, "uv_timer_stop");
     status_watch.active = 0;
+
+    return 0;
+}
+
+//switch to working in simulated time
+int sitl2_cli_SIM_START(sitl2_cli_context_t *ctx){
+    int rc;
+
+    rc = sitl2_start_simulated_time(ctx->state);
+    WMQ_CHECK_ERROR_AND_RETURN_RESULT(rc, "sitl2_start_simulated_time");
+
+    return 0;
+}
+
+//switch to working in real time
+int sitl2_cli_SIM_STOP(sitl2_cli_context_t *ctx){
+    int rc;
+
+    rc = sitl2_stop_simulated_time(ctx->state);
+    WMQ_CHECK_ERROR_AND_RETURN_RESULT(rc, "sitl2_stop_simulated_time");
 
     return 0;
 }

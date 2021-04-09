@@ -54,11 +54,26 @@ typedef struct sitl2_state_s {
     //loop start 'real' time, nanoseconds
     uint64_t start_hrtime;
 
+    //time in nanoseconds on previous step
+    uint64_t time_prev_ns;
+
     //0 - 'real' time, 1 - simulated time
     int is_simulated_time;
 
+    //how many time steps perform in run timer
+    uint32_t steps_count;
+
     //simulated time in nanoseconds
     uint64_t sim_time_ns;
+
+    //simulated time step, in nanoseconds
+    uint64_t sim_time_step_ns;
+
+    //simulation time call count
+    uint64_t sim_timer_calls;
+
+    //nanoseconds in simulation timer call
+    uint64_t sim_timer_ns;
 
     //scheduler call count
     uint64_t scheduler_calls;
@@ -89,8 +104,17 @@ void sitl2_close_event_loop(sitl2_state_t *state);
 //run betaflight scheduler and calculate stats
 void sitl2_scheduler_with_stats(sitl2_state_t *state);
 
+//current time in nanoseconds
+uint64_t sitl2_current_time_ns(sitl2_state_t *state);
+
 //current time in microseconds
-int64_t sitl2_micros64(sitl2_state_t *state);
+int64_t sitl2_current_time_us(sitl2_state_t *state);
 
 //current time in milliseconds
-int64_t sitl2_millis64(sitl2_state_t *state);
+int64_t sitl2_current_time_ms(sitl2_state_t *state);
+
+//start working in simulated time
+int sitl2_start_simulated_time(sitl2_state_t *state);
+
+//stop working in simulated time
+int sitl2_stop_simulated_time(sitl2_state_t *state);
