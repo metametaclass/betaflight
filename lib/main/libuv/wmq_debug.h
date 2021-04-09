@@ -120,6 +120,6 @@ void debug_fflush();
 
 #define WMQ_NOT_IMPLEMENTED()                                                                           \
     do {                                                                                                \
-        debug_print(LL_ERROR, __func__ " not implemented. File:" __FILE__ " Line:" TOSTRING(__LINE__)); \
+        debug_print(LL_ERROR, "%s not implemented. File:" __FILE__ " Line:" TOSTRING(__LINE__), __func__ ); \
         return UV_ENOSYS;                                                                               \
     } while (0)
