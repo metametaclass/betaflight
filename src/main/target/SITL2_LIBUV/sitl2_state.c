@@ -7,6 +7,7 @@
 
 #include "scheduler/scheduler.h"
 #include "fc/init.h"
+#include "fc/tasks.h"
 
 
 
@@ -164,6 +165,22 @@ void sitl2_scheduler_with_stats(sitl2_state_t *state){
     state->scheduler_calls++;
 }
 
+//zero all time and state variables
+void sitl2_reset_simulation_state(sitl2_state_t *state){
+    state->scheduler_calls = 0;
+    state->scheduler_nanoseconds = 0;
+    state->time_prev_ns = 0;
+    state->sim_timer_calls = 0;
+    state->sim_timer_ns = 0;
+
+    //reset task times
+    for (taskId_e taskId = 0; taskId < TASK_COUNT; taskId++) {
+        getTask(taskId)->lastDesiredAt = 0;
+        getTask(taskId)->lastSignaledAtUs = 0;
+        getTask(taskId)->lastExecutedAtUs = 0;
+        schedulerResetTaskStatistics(taskId);
+    }
+}
 
 //start working in simulated time
 int sitl2_start_simulated_time(sitl2_state_t *state){
@@ -174,11 +191,11 @@ int sitl2_start_simulated_time(sitl2_state_t *state){
 
     state->is_simulated_time = 1;
     state->sim_time_ns = 0;
-    state->time_prev_ns = 0;
+
     state->sim_time_step_ns = 1000;//1 us
-    state->steps_count = 2000;
-    state->scheduler_calls = 0;
-    state->scheduler_nanoseconds = 0;
+    state->steps_count = 5000;
+
+    sitl2_reset_simulation_state(state);
 
     //TODO: swap betaflight realtime/simulated state?
     return 0;
@@ -194,9 +211,8 @@ int sitl2_stop_simulated_time(sitl2_state_t *state){
 
     //reset start time
     state->start_hrtime = uv_hrtime();
-    state->time_prev_ns = 0;
-    state->scheduler_calls = 0;
-    state->scheduler_nanoseconds = 0;
+
+    sitl2_reset_simulation_state(state);
 
     //TODO: swap betaflight realtime/simulated state?
     return 0;
