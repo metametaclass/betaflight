@@ -21,7 +21,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
+
 #include <string.h>
 
 #include <errno.h>
@@ -68,10 +68,6 @@ const timerHardware_t timerHardware[1]; // unused
 uint32_t SystemCoreClock;
 
 //static servo_packet pwmPkt;
-
-#define RAD2DEG (180.0 / M_PI)
-#define ACC_SCALE (256 / 9.80665)
-#define GYRO_SCALE (16.4)
 
 
 // system

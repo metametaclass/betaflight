@@ -6,6 +6,7 @@ TARGET_SRC = \
             drivers/barometer/barometer_fake.c \
             drivers/compass/compass_fake.c \
             drivers/serial_libuv.c \
-			sitl2_state.c \
-			sitl2_motors.c \
-			sitl2_command_line.c
+            sitl2_state.c \
+            sitl2_motors.c \
+            sitl2_command_line.c \
+            sitl2_physics.c

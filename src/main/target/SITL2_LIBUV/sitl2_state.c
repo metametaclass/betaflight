@@ -4,11 +4,11 @@
 
 #include "sitl2_state.h"
 #include "sitl2_command_line.h"
+#include "sitl2_physics.h"
 
 #include "scheduler/scheduler.h"
 #include "fc/init.h"
 #include "fc/tasks.h"
-
 
 
 sitl2_state_t simulator_state = { 0 };
@@ -54,6 +54,7 @@ void on_walk_handles(uv_handle_t* handle, void* arg) {
 }
 
 void run_timer_cb(uv_timer_t *timer) {
+    int rc;
     uv_loop_t *loop = timer->loop;
     sitl2_state_t *state = container_of(loop, sitl2_state_t, loop);
 
@@ -61,14 +62,22 @@ void run_timer_cb(uv_timer_t *timer) {
         state->sim_timer_calls++;
         uint64_t start = uv_hrtime();
         for(uint32_t i=0; i<state->steps_count; i++) {
-            state->sim_time_ns += state->sim_time_step_ns;
+
             sitl2_scheduler_with_stats(state);
+
+            rc = sitl2_calc_physics(state);
+            WMQ_CHECK_ERROR_AND_RETURN_VOID(rc, "sitl2_calc_physics");
+            //TODO: stop simulation on error?
+
+            state->sim_time_ns += state->sim_time_step_ns;
         }
         uint64_t end = uv_hrtime();
         state->sim_timer_ns += (end-start);
     }else{
         sitl2_scheduler_with_stats(state);
         processLoopback();
+
+        sitl2_set_random_imu();
     }
 }
 

@@ -5,6 +5,7 @@
 #include "scheduler/scheduler.h"
 #include "fc/runtime_config.h"
 #include "fc/rc.h"
+#include "flight/imu.h"
 #include "common/maths.h"
 
 #include "wmq_error.h"
@@ -20,6 +21,7 @@ typedef struct {
     int watch_time;
     int watch_task_rate;
     int watch_scheduler;
+    int watch_attitude;
     int watch_arm_flags;
     int watch_motors;
 } sitl2_cli_context_t;
@@ -50,6 +52,11 @@ void sitl2_status_print_task_rate(){
     const int systemRate = getTaskDeltaTimeUs(TASK_SYSTEM) == 0 ? 0 : (int)(1000000.0f / ((float)getTaskDeltaTimeUs(TASK_SYSTEM)));
     printf("CPU:%d%%, cycle time: %d, GYRO rate: %d, RX rate: %d, System rate: %d\n",
             constrain(getAverageSystemLoadPercent(), 0, 100), getTaskDeltaTimeUs(TASK_GYRO), gyroRate, rxRate, systemRate);
+}
+
+
+void sitl2_status_print_attitude() {
+    printf("attitude: %d, %d, %d ; roll:%.1f pitch:%.1f yaw:%.1f\n", attitude.raw[0], attitude.raw[1], attitude.raw[2], attitude.values.roll*0.1, attitude.values.pitch*0.1, attitude.values.yaw*0.1);
 }
 
 void sitl2_status_print_arm_flags(){
@@ -120,6 +127,8 @@ int sitl2_cli_STATUS(sitl2_cli_context_t *ctx){
     // Battery meter
     //printf("Voltage: %d * 0.01V (%dS battery - %s)\n", getBatteryVoltage(), getBatteryCellCount(), getBatteryStateString());
 
+    sitl2_status_print_attitude();
+
     sitl2_status_print_arm_flags();
     return 0;
 }
@@ -132,6 +141,7 @@ typedef struct status_watch_s {
     int arm_flags;
     int motors;
     int scheduler;
+    int attitude;
 } status_watch_t;
 
 static status_watch_t status_watch = { 0 };
@@ -151,6 +161,9 @@ void on_watch_timer(uv_timer_t *t){
     }
     if(watch->scheduler) {
         sitl2_status_print_scheduler();
+    }
+    if(watch->attitude) {
+        sitl2_status_print_attitude();
     }
     if(watch->arm_flags) {
         sitl2_status_print_arm_flags();
@@ -183,6 +196,7 @@ int sitl2_cli_WATCH(sitl2_cli_context_t *ctx){
         status_watch.motors = ctx->watch_all || ctx->watch_motors;
         status_watch.arm_flags = ctx->watch_all || ctx->watch_arm_flags;
         status_watch.scheduler = ctx->watch_all || ctx->watch_scheduler;
+        status_watch.attitude = ctx->watch_all || ctx->watch_attitude;
     }
 
     ctx->state->time_prev_ns = sitl2_current_time_ns(ctx->state);
