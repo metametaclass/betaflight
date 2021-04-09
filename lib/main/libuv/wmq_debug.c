@@ -84,6 +84,8 @@ pid_t gettid() {
 #endif
 
 void do_update_time(ticks_t ticks, int counter) {
+    (void)ticks;
+    (void)counter;
     int r;
     time_t dest;
     struct tm tmdata;
