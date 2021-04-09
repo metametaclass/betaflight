@@ -126,6 +126,7 @@ int sitl2_cli_WATCH(sitl2_cli_context_t *ctx){
 }
 
 int sitl2_cli_WATCH_STOP(sitl2_cli_context_t *ctx){
+    UNUSED(ctx);
     int rc;
     //uv_loop_t *loop = &ctx->state->loop;
 
