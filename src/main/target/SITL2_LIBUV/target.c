@@ -200,6 +200,19 @@ void delay(uint32_t ms) {
 }
 */
 
+uint64_t scheduler_calls = 0;
+uint64_t scheduler_nanoseconds = 0;
+
+//scheduler call with stats
+void scheduler_with_stats(){
+    uint64_t begin = uv_hrtime();
+    scheduler();
+    uint64_t end = uv_hrtime();
+    scheduler_nanoseconds += (end-begin);
+    scheduler_calls++;
+}
+
+
 //TODO: use something like yield/coroutines to run another uv_loop iteration
 void delay(uint32_t ms)
 {
@@ -215,9 +228,19 @@ void delayMicroseconds(timeUs_t us)
 //TODO: use float division 
 //https://stackoverflow.com/questions/55832817/why-float-division-is-faster-than-integer-division-in-c
 
+uint64_t micros64(void) {
+    uint64_t hrtime = uv_hrtime();
+    return (hrtime - start_hrtime)/1000;
+}
+
 uint32_t micros(void) {
     uint64_t hrtime = uv_hrtime();
     return ((hrtime - start_hrtime)/1000) & 0xFFFFFFFF;
+}
+
+uint64_t millis64(void) {
+    uint64_t hrtime = uv_hrtime();
+    return (hrtime - start_hrtime)/1000000;
 }
 
 uint32_t millis(void) {
@@ -368,7 +391,7 @@ typedef struct {
 } sitl2_cli_context_t;
 
 void sitl2_status_print_time(){
-    printf("System Uptime: %lu microseconds, %d seconds\n", micros(),  millis() / 1000);
+    printf("System Uptime: %lu microseconds, %lu seconds, %lu scheduler calls, %.3f seconds in scheduler\n", micros64(),  millis64() / 1000, scheduler_calls, scheduler_nanoseconds * 1e-9);
 }
 
 void sitl2_status_print_task_rate(){
@@ -394,10 +417,11 @@ void sitl2_status_print_arm_flags(){
 }
 
 int sitl2_cli_STATUS(sitl2_cli_context_t *ctx){
+    UNUSED(ctx);
+
     sitl2_status_print_time();
 
     sitl2_status_print_task_rate();
-    
 
     // Battery meter
     //printf("Voltage: %d * 0.01V (%dS battery - %s)\n", getBatteryVoltage(), getBatteryCellCount(), getBatteryStateString());

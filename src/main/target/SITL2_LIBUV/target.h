@@ -268,3 +268,5 @@ extern uv_loop_t libuv_loop;
 
 
 int sitl2_parse_command_line(char *data, size_t size);
+
+void scheduler_with_stats();

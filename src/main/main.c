@@ -83,7 +83,7 @@ void on_walk_handles(uv_handle_t* handle, void* arg) {
 void run_timer_cb(uv_timer_t *timer) {
     UNUSED(timer);
     //TODO: shift emulation time?
-    scheduler();
+    scheduler_with_stats();
     processLoopback();
 }
 
@@ -97,7 +97,7 @@ void on_idle(uv_idle_t *idle) {
     //     processLoopback();
     //     hr_time = next_time;
     // }
-    scheduler();
+    scheduler_with_stats();
 }
 
 int main(int argc, char** argv) {
@@ -110,6 +110,8 @@ int main(int argc, char** argv) {
 
     debug_set_level(LL_DETAIL, WMQ_LOG_OPTION_USE_ODS | WMQ_LOG_OPTION_USE_STDERR | WMQ_LOG_OPTION_SHOW_TIME | WMQ_LOG_OPTION_SHOW_PID | WMQ_LOG_OPTION_SHOW_TID);
     WMQ_LOG(LL_INFO, "starting, sizeof(long unsigned int):%zu sizeof(int):%zu", sizeof(long unsigned int), sizeof(int));
+
+    //setlocale(LC_NUMERIC, "");
 
     //init libuv message loop
     rc = uv_loop_init(&libuv_loop);
